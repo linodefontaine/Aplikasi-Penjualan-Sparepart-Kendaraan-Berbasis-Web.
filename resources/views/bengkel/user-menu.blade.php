@@ -153,24 +153,16 @@
                                 @if ($tenantPhone)
                                     <p>📞 {{ $tenantPhone }}</p>
                                 @endif
-                                @if ($tenant->getAttribute('address'))
-                                    <p>📍 {{ $tenant->getAttribute('address') }}</p>
-                                @endif
                                 @if ($tenant->owner)
                                     <p>👤 {{ $tenant->owner->name }}</p>
                                 @endif
                             </div>
                         </div>
-                        <div class="grid gap-2">
-                            <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-xs transition duration-200">
-                                Lihat Katalog Sparepart
+                        @if ($tenantPhone)
+                            <a href="tel:{{ $tenantPhone }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                                Hubungi Bengkel
                             </a>
-                            @if ($tenantPhone)
-                                <a href="tel:{{ $tenantPhone }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
-                                    Hubungi Bengkel
-                                </a>
-                            @endif
-                        </div>
+                        @endif
                     </article>
                 @empty
                     <div class="sm:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-gray-700 bg-[#111827] px-5 py-10 text-center">

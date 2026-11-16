@@ -86,11 +86,6 @@
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-3">
-                @if (auth()->user()->role === 'Owner')
-                    <a href="{{ route('owner.settings') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-[10px] font-medium text-gray-300 transition hover:border-blue-500 hover:text-white sm:text-xs">
-                        Pengaturan Katalog & Pesanan
-                    </a>
-                @endif
                 <a href="{{ route('user.menu') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-[10px] font-medium text-gray-300 transition hover:border-blue-500 hover:text-white sm:text-xs">
                     <span aria-hidden="true">←</span>
                     <span>Kembali ke Akun Utama</span>

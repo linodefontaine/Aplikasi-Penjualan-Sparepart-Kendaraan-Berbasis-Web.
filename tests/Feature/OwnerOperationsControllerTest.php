@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OwnerOperationsControllerTest extends TestCase
@@ -221,138 +219,6 @@ class OwnerOperationsControllerTest extends TestCase
         }
     }
 
-    public function test_owner_can_upload_replace_and_publish_a_product_image_per_tenant(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Foto Produk',
-            'subdomain' => 'bengkel-foto-produk',
-            'package' => 'starter',
-        ], 'Pemilik Foto Produk', '081298765440');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-
-        try {
-            $this->post(route('owner.stok.store'), [
-                'sku' => 'PHOTO-PART-001',
-                'name' => 'Kampas Rem Bergambar',
-                'stock' => 3,
-                'price' => 75000,
-                'unit' => 'set',
-                'minimum_stock' => 1,
-                'image' => UploadedFile::fake()->image('kampas-rem.png'),
-            ])->assertRedirect(route('owner.stok'))
-                ->assertSessionHas('success', 'Sparepart berhasil ditambahkan.');
-
-            $part = $tenant->run(fn (): object => DB::table('spare_parts')
-                ->where('sku', 'PHOTO-PART-001')
-                ->first());
-            $firstImagePath = $part->image_path;
-
-            $this->assertStringStartsWith(
-                'tenants/'.$tenant->getTenantKey().'/spare-parts/',
-                $firstImagePath,
-            );
-            Storage::disk('public')->assertExists($firstImagePath);
-
-            $this->patch(route('owner.stok.image', $part->id), [
-                'image' => UploadedFile::fake()->image('kampas-rem-baru.png'),
-            ])->assertRedirect(route('owner.stok'))
-                ->assertSessionHas('success', 'Foto sparepart berhasil diperbarui.');
-
-            $updatedImagePath = $tenant->run(fn (): string => (string) DB::table('spare_parts')
-                ->where('id', $part->id)
-                ->value('image_path'));
-            $this->assertNotSame($firstImagePath, $updatedImagePath);
-            Storage::disk('public')->assertMissing($firstImagePath);
-            Storage::disk('public')->assertExists($updatedImagePath);
-
-            $this->get(route('owner.stok'))
-                ->assertOk()
-                ->assertSee('/storage/'.$updatedImagePath)
-                ->assertSee('Ubah foto');
-
-            $customer = User::factory()->create(['role' => 'Pelanggan']);
-            $this->actingAs($customer)
-                ->get(route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]))
-                ->assertOk()
-                ->assertSee('Kampas Rem Bergambar')
-                ->assertSee('/storage/'.$updatedImagePath)
-                ->assertSee('Foto Kampas Rem Bergambar');
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
-    public function test_sparepart_image_upload_rejects_non_images_without_saving_a_product(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Validasi Foto',
-            'subdomain' => 'bengkel-validasi-foto',
-            'package' => 'starter',
-        ], 'Pemilik Validasi Foto', '081298765441');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-
-        try {
-            $this->post(route('owner.stok.store'), [
-                'sku' => 'PHOTO-PART-INVALID',
-                'name' => 'Produk Tanpa Foto',
-                'stock' => 1,
-                'price' => 10000,
-                'unit' => 'pcs',
-                'minimum_stock' => 0,
-                'image' => UploadedFile::fake()->create('dokumen.pdf', 100, 'application/pdf'),
-            ])->assertSessionHasErrors('image');
-
-            $tenant->run(function (): void {
-                $this->assertDatabaseCount('spare_parts', 0);
-            });
-            Storage::disk('public')->assertEmpty();
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
-    public function test_only_the_owner_can_upload_product_images_and_missing_parts_leave_no_file(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Otorisasi Foto',
-            'subdomain' => 'bengkel-otorisasi-foto',
-            'package' => 'starter',
-        ], 'Pemilik Otorisasi Foto', '081298765442');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-        $owner = auth()->user();
-        $cashier = User::factory()->create([
-            'role' => 'Kasir',
-            'tenant_id' => $tenant->getTenantKey(),
-        ]);
-
-        try {
-            $this->actingAs($cashier)
-                ->patch(route('owner.stok.image', 999999), [
-                    'image' => UploadedFile::fake()->image('foto.png'),
-                ])
-                ->assertForbidden();
-            Storage::disk('public')->assertEmpty();
-
-            $this->actingAs($owner)
-                ->patch(route('owner.stok.image', 999999), [
-                    'image' => UploadedFile::fake()->image('foto.png'),
-                ])
-                ->assertNotFound();
-            Storage::disk('public')->assertEmpty();
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
     public function test_stock_adjustment_rejects_negative_results_and_cashiers_cannot_manage_inventory(): void
     {
         $tenant = $this->createTenantForMainAccount([
@@ -528,6 +394,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '6f8d7e55-7d88-4ee2-8b78-8ff3b9fcce01',
                     'customer_id' => $catalog['customerId'],
                     'payment_method' => 'cash',
                     'amount_paid' => 250000,
@@ -599,6 +466,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '7268820c-79c3-4fdb-bf66-45a1e448d415',
                     'payment_method' => 'cash',
                     'amount_paid' => 50000,
                     'parts' => [$partId],

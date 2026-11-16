@@ -43,12 +43,6 @@
             </div>
 
             <div class="space-y-1.5">
-                <label for="address" class="block text-xs font-medium text-gray-300">Alamat Bengkel (opsional)</label>
-                <textarea id="address" name="address" rows="2" maxlength="2000" placeholder="Alamat lengkap bengkel"
-                    class="w-full bg-[#161e2e] border border-gray-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition">{{ old('address') }}</textarea>
-            </div>
-
-            <div class="space-y-1.5">
                 <label for="subdomain" class="block text-xs font-medium text-gray-300">Domain Akses Bengkel</label>
                 <div class="flex rounded-xl overflow-hidden border border-gray-700/80 bg-[#161e2e]">
                     <input id="subdomain" type="text" name="subdomain" value="{{ old('subdomain') }}" placeholder="majujaya" required

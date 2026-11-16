@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\OwnerDashboardController;
-use App\Http\Controllers\OwnerOperationsController;
+use App\Modules\Workshop\Http\Controllers\OwnerDashboardController;
+use App\Modules\Workshop\Http\Controllers\OwnerOperationsController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
