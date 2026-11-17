@@ -174,12 +174,18 @@ class OwnerOperationsControllerTest extends TestCase
                 'sku' => 'part-001',
                 'name' => 'Kampas Rem',
                 'stock' => 5,
+                'purchase_price' => 50000,
                 'price' => 85000,
                 'category' => 'Rem',
                 'unit' => 'set',
                 'minimum_stock' => 2,
                 'location' => 'Rak A1',
             ])->assertRedirect(route('owner.stok'));
+
+            $this->get(route('owner.stok'))
+                ->assertOk()
+                ->assertSee('Rp 50.000')
+                ->assertSee('Rp 85.000');
 
             $partId = $tenant->run(fn (): int => (int) DB::table('spare_parts')
                 ->where('sku', 'PART-001')
@@ -195,6 +201,7 @@ class OwnerOperationsControllerTest extends TestCase
                     'id' => $partId,
                     'sku' => 'PART-001',
                     'stock' => 3,
+                    'purchase_price' => 50000,
                 ]);
                 $this->assertDatabaseHas('inventory_movements', [
                     'spare_part_id' => $partId,
@@ -543,6 +550,141 @@ class OwnerOperationsControllerTest extends TestCase
                     'channel' => 'whatsapp',
                     'message' => 'Jadwalkan servis berikutnya',
                 ]);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_starter_tenant_cannot_add_a_third_active_mechanic(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Starter',
+            'subdomain' => 'bengkel-paket-starter',
+            'package' => 'starter',
+        ], 'Pemilik Starter', '081298765418');
+
+        try {
+            $tenant->run(function (): void {
+                DB::table('employees')->insert([
+                    [
+                        'name' => 'Mekanik Starter 1',
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    [
+                        'name' => 'Mekanik Starter 2',
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                ]);
+            });
+
+            $this->from(route('owner.mekanik'))
+                ->post(route('owner.mekanik.store'), [
+                    'name' => 'Mekanik Starter 3',
+                    'position' => 'Mekanik',
+                ])
+                ->assertRedirectBackWithErrors([
+                    'name' => 'Paket Starter membatasi maksimal 2 karyawan/mekanik aktif.',
+                ]);
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseCount('employees', 2);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_pro_tenant_cannot_add_an_eleventh_active_mechanic(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Pro',
+            'subdomain' => 'bengkel-paket-pro',
+            'package' => 'pro',
+        ], 'Pemilik Pro', '081298765419');
+
+        try {
+            $tenant->run(function (): void {
+                $employees = [];
+
+                for ($index = 1; $index <= 10; $index++) {
+                    $employees[] = [
+                        'name' => 'Mekanik Pro '.$index,
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                DB::table('employees')->insert($employees);
+            });
+
+            $this->from(route('owner.mekanik'))
+                ->post(route('owner.mekanik.store'), [
+                    'name' => 'Mekanik Pro 11',
+                    'position' => 'Mekanik',
+                ])
+                ->assertRedirectBackWithErrors([
+                    'name' => 'Paket Pro membatasi maksimal 10 karyawan/mekanik aktif.',
+                ]);
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseCount('employees', 10);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_enterprise_tenant_can_add_more_than_ten_active_mechanics(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Enterprise',
+            'subdomain' => 'bengkel-paket-enterprise',
+            'package' => 'enterprise',
+        ], 'Pemilik Enterprise', '081298765420');
+
+        try {
+            $tenant->run(function (): void {
+                $employees = [];
+
+                for ($index = 1; $index <= 10; $index++) {
+                    $employees[] = [
+                        'name' => 'Mekanik Enterprise '.$index,
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                DB::table('employees')->insert($employees);
+            });
+
+            $this->post(route('owner.mekanik.store'), [
+                'name' => 'Mekanik Enterprise 11',
+                'position' => 'Mekanik',
+            ])->assertRedirect(route('owner.mekanik'));
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseHas('employees', [
+                    'name' => 'Mekanik Enterprise 11',
+                    'status' => 'active',
+                ]);
+                $this->assertDatabaseCount('employees', 11);
             });
         } finally {
             tenancy()->end();

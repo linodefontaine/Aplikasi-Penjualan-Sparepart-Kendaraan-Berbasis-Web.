@@ -43,6 +43,12 @@
             </p>
         </div>
 
+        @if (session('status'))
+            <p role="status" class="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">
+                {{ session('status') }}
+            </p>
+        @endif
+
         @if ($loginRole !== 'tenant')
             <div class="grid grid-cols-2 gap-2 bg-[#1f2937] p-1.5 rounded-xl mb-6 border border-gray-800">
                 <button type="button" id="btn-user" onclick="switchRole('user')"

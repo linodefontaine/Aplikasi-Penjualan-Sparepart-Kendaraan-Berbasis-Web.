@@ -77,6 +77,10 @@
                     <div>
                         <span class="text-xs bg-green-500/10 text-green-400 font-semibold px-2.5 py-1 rounded">Aktif</span>
                         <p class="text-[11px] text-gray-400 mt-2">Jadwalkan servis melalui formulir booking</p>
+                        <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}"
+                            class="mt-3 inline-flex rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
+                            Lihat Katalog Sparepart
+                        </a>
                     </div>
                 </div>
             </div>

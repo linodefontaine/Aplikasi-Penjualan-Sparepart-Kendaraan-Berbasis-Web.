@@ -90,14 +90,17 @@
                             <input name="name" value="{{ old('name') }}" required maxlength="255" placeholder="Nama sparepart" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             <div class="grid grid-cols-2 gap-2">
                                 <input name="stock" type="number" value="{{ old('stock', 0) }}" min="0" required placeholder="Stok awal" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
-                                <input name="price" type="number" value="{{ old('price') }}" min="0" step="0.01" required placeholder="Harga" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                                <input name="purchase_price" type="number" value="{{ old('purchase_price') }}" min="0" step="0.01" placeholder="Harga beli" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
+                                <input name="price" type="number" value="{{ old('price') }}" min="0" step="0.01" required placeholder="Harga jual" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                 <input name="category" value="{{ old('category') }}" maxlength="255" placeholder="Kategori" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
-                                <input name="unit" value="{{ old('unit', 'pcs') }}" maxlength="50" required placeholder="Satuan" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
+                                <input name="unit" value="{{ old('unit', 'pcs') }}" maxlength="50" required placeholder="Satuan" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                 <input name="minimum_stock" type="number" value="{{ old('minimum_stock', 0) }}" min="0" required placeholder="Batas stok minimum" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                            </div>
+                            <div>
                                 <input name="location" value="{{ old('location') }}" maxlength="255" placeholder="Lokasi rak" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
                             @if ($errors->any())
@@ -173,6 +176,7 @@
                                 <th class="px-4 py-3">Nama Suku Cadang</th>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Rak / Lokasi</th>
+                                <th class="px-4 py-3">Harga Beli</th>
                                 <th class="px-4 py-3">Harga Jual</th>
                                 <th class="px-4 py-3">Sisa Stok</th>
                                 <th class="px-4 py-3">Status</th>
@@ -190,6 +194,7 @@
                                     <td class="px-4 py-3 font-bold text-white">{{ $part->name }}</td>
                                     <td class="px-4 py-3 text-gray-400">{{ $part->category ?: '-' }}</td>
                                     <td class="px-4 py-3">{{ $part->location ?: '-' }}</td>
+                                    <td class="px-4 py-3 font-mono">Rp {{ number_format($part->purchase_price, 0, ',', '.') }}</td>
                                     <td class="px-4 py-3 font-mono">Rp {{ number_format($part->price, 0, ',', '.') }}</td>
                                     <td class="px-4 py-3 font-bold {{ $outOfStock ? 'text-red-400' : ($lowStock ? 'text-yellow-400' : 'text-white') }}">{{ number_format($part->stock, 0, ',', '.') }} {{ $part->unit }}</td>
                                     <td class="px-4 py-3">
@@ -220,7 +225,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-4 py-8 text-center text-gray-400">
+                                    <td colspan="9" class="px-4 py-8 text-center text-gray-400">
                                         {{ $search !== '' ? 'Sparepart tidak ditemukan.' : 'Belum ada data sparepart di bengkel ini.' }}
                                     </td>
                                 </tr>

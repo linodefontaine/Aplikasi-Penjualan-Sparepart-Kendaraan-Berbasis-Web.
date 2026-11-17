@@ -24,9 +24,10 @@ class PasswordResetController extends Controller
         $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
+        $email = Str::lower($validated['email']);
 
-        if (! Str::endsWith(Str::lower($validated['email']), '@accounts.amahay.invalid')) {
-            Password::sendResetLink($validated);
+        if (! Str::endsWith($email, '@accounts.amahay.invalid')) {
+            Password::sendResetLink(['email' => $email]);
         }
 
         return back()->with(
@@ -50,6 +51,7 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
+        $validated['email'] = Str::lower($validated['email']);
 
         $status = Password::reset($validated, function (User $user, string $password): void {
             $user->forceFill([

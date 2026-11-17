@@ -49,7 +49,16 @@ class TenantRegistrationControllerTest extends TestCase
         $this->get(route('tenant.create'))
             ->assertOk()
             ->assertSee('Daftarkan Tenant Bengkel')
-            ->assertSee('Pemilik Akun');
+            ->assertSee('Pemilik Akun')
+            ->assertSeeInOrder([
+                'Starter Tenant — Rp 149rb / bln',
+                'Pro Tenant — Rp 249rb / bln',
+                'Enterprise — Rp 499rb / bln',
+            ])
+            ->assertSee('Semua paket mendapatkan gratis masa percobaan (Trial) selama 14 hari.')
+            ->assertSee('Maksimal 2 karyawan/mekanik aktif.')
+            ->assertSee('Maksimal 10 karyawan/mekanik aktif.')
+            ->assertSee('Karyawan/mekanik aktif tanpa batas.');
         $this->post(route('tenant.store'), [
             'tenant_name' => 'Bengkel Utama',
             'subdomain' => 'bengkel-utama',
@@ -57,6 +66,7 @@ class TenantRegistrationControllerTest extends TestCase
         ])->assertRedirect(route('owner.home'));
 
         $tenant = Tenant::query()->firstOrFail();
+        $this->assertSame('starter', $tenant->getAttribute('package'));
         $this->assertDatabaseHas('users', [
             'id' => $customer->id,
             'role' => 'Owner',

@@ -55,10 +55,16 @@
                 <label for="package" class="block text-xs font-medium text-gray-300">Pilih Paket Awal</label>
                 <select id="package" name="package" required
                     class="w-full bg-[#161e2e] border border-gray-700/80 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition">
-                    <option value="pro" @selected(old('package', 'pro') === 'pro')>Pro Tenant — Rp 249rb / bln (Trial 14 Hari)</option>
-                    <option value="starter" @selected(old('package') === 'starter')>Starter Tenant — Rp 149rb / bln</option>
-                    <option value="enterprise" @selected(old('package') === 'enterprise')>Enterprise — Rp 499rb / bln</option>
+                    @foreach ($packages as $key => $package)
+                        <option value="{{ $key }}" data-description="{{ $package['description'] }}" @selected(old('package', 'pro') === $key)>
+                            {{ $package['name'] }} — {{ $package['price'] }}
+                        </option>
+                    @endforeach
                 </select>
+                <p id="package-description" aria-live="polite" class="rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2 text-xs text-blue-200">
+                    {{ $packages[old('package', 'pro')]['description'] ?? $packages['pro']['description'] }}
+                </p>
+                <p class="text-xs text-gray-400">Semua paket mendapatkan gratis masa percobaan (Trial) selama 14 hari.</p>
             </div>
 
             <button type="submit"
@@ -72,6 +78,18 @@
         </div>
     </div>
 
+    <script>
+        const packageSelect = document.getElementById('package');
+        const packageDescription = document.getElementById('package-description');
+
+        packageSelect.addEventListener('change', () => {
+            const selectedOption = packageSelect.options[packageSelect.selectedIndex];
+
+            if (selectedOption) {
+                packageDescription.textContent = selectedOption.dataset.description;
+            }
+        });
+    </script>
 </body>
 
 </html>

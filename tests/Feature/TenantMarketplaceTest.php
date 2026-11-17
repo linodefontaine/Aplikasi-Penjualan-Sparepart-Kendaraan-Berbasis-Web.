@@ -6,6 +6,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class TenantMarketplaceTest extends TestCase
@@ -64,7 +65,14 @@ class TenantMarketplaceTest extends TestCase
                 ]);
             });
 
-            $this->get(route('user.bengkel.pembayaran', [
+            $this->actingAs($owner)
+                ->get(route('owner.kasir'))
+                ->assertOk()
+                ->assertSee($invoice)
+                ->assertSee('Kampas Rem Marketplace')
+                ->assertSee('Konfirmasi pembayaran');
+
+            $this->actingAs($customer)->get(route('user.bengkel.pembayaran', [
                 'id' => $tenant->getTenantKey(),
                 'invoice' => $invoice,
             ]))
@@ -93,6 +101,7 @@ class TenantMarketplaceTest extends TestCase
 
             $this->actingAs($owner)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => (string) Str::uuid(),
                     'parts' => [$partId],
                     'part_quantities' => [$partId => 2],
                     'payment_method' => 'cash',
