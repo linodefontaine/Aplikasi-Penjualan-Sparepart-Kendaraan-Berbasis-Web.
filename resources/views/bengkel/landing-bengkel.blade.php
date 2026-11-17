@@ -929,23 +929,23 @@
             <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Total Kendaraan</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['totalVehicles'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Transaksi Selesai</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['completedTransactions'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Sparepart Terjual</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['sparePartsSold'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Pendapatan</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">Rp {{ number_format($statistics['revenue'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
             </div>
         </section>

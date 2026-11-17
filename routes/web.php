@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\OwnerOperationsController as LegacyOwnerOperationsController;
+use App\Http\Controllers\TenantStorefrontController;
 use App\Modules\Customer\Http\Controllers\CustomerBookingController;
 use App\Modules\Customer\Http\Controllers\CustomerDirectoryController;
 use App\Modules\Customer\Http\Controllers\CustomerProfileController;
 use App\Modules\Customer\Http\Controllers\CustomerServiceController;
 use App\Modules\Identity\Http\Controllers\AuthController;
 use App\Modules\Identity\Http\Controllers\PasswordResetController;
+use App\Modules\Platform\Http\Controllers\LandingPageController;
 use App\Modules\Platform\Http\Controllers\SuperAdminProfileController;
 use App\Modules\Platform\Http\Controllers\TenantDirectoryController;
 use App\Modules\Platform\Http\Controllers\TenantModerationController;
@@ -22,9 +25,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Landing Page Publik
-Route::get('/', function () {
-    return view('bengkel.landing-bengkel');
-})->name('home');
+Route::get('/', LandingPageController::class)->name('home');
 
 // Halaman Login & Register Publik
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -72,6 +73,12 @@ Route::middleware(['auth', 'role:Pelanggan,Owner'])->prefix('user-menu')->name('
 
     // Halaman Detail Bengkel
     Route::get('/bengkel/{id}', [CustomerBookingController::class, 'show'])->name('bengkel.detail');
+    Route::get('/bengkel/{id}/katalog', [TenantStorefrontController::class, 'catalog'])->name('bengkel.katalog');
+    Route::post('/bengkel/{id}/pesanan', [TenantStorefrontController::class, 'storeOrder'])
+        ->name('bengkel.pesanan.store');
+    Route::get('/bengkel/{id}/pembayaran/{invoice}', [TenantStorefrontController::class, 'payment'])
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('bengkel.pembayaran');
     Route::post('/bengkel/{id}/booking', [CustomerBookingController::class, 'store'])->name('bengkel.booking');
 
     // Halaman Cek Servis
@@ -110,12 +117,22 @@ Route::middleware(['auth', 'role:Owner,Kasir,Mekanik', 'tenant.active'])->prefix
 
     Route::get('/pengingat', [OwnerOperationsController::class, 'reminders'])->name('pengingat');
 
+    Route::get('/settings', [LegacyOwnerOperationsController::class, 'settings'])
+        ->middleware('role:Owner')
+        ->name('settings');
+    Route::put('/settings', [LegacyOwnerOperationsController::class, 'updateSettings'])
+        ->middleware('role:Owner')
+        ->name('settings.update');
     Route::post('/stok', [OwnerOperationsController::class, 'storePart'])
         ->middleware('role:Owner')
         ->name('stok.store');
     Route::post('/kasir/checkout', [OwnerOperationsController::class, 'checkout'])
         ->middleware('role:Owner,Kasir')
         ->name('kasir.checkout');
+    Route::post('/kasir/pesanan/{sale}/konfirmasi', [LegacyOwnerOperationsController::class, 'confirmMarketplacePayment'])
+        ->middleware('role:Owner,Kasir')
+        ->whereNumber('sale')
+        ->name('kasir.pesanan.confirm');
     Route::get('/kasir/{invoice}/pembayaran', [OwnerPaymentController::class, 'show'])
         ->middleware('role:Owner,Kasir')
         ->where('invoice', '[A-Za-z0-9-]+')

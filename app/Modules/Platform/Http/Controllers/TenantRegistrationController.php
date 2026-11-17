@@ -4,6 +4,7 @@ namespace App\Modules\Platform\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Modules\Platform\Services\TenantPackageCatalog;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,16 +16,18 @@ use Stancl\Tenancy\Database\Models\Domain;
 
 class TenantRegistrationController extends Controller
 {
-    public function create(Request $request): View|RedirectResponse
+    public function create(Request $request, TenantPackageCatalog $packageCatalog): View|RedirectResponse
     {
         if ($redirect = $this->existingAccountDestination($request)) {
             return $redirect;
         }
 
-        return view('auth.register');
+        return view('auth.register', [
+            'packages' => $packageCatalog->all(),
+        ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, TenantPackageCatalog $packageCatalog): RedirectResponse
     {
         if ($redirect = $this->existingAccountDestination($request)) {
             return $redirect;
@@ -48,7 +51,7 @@ class TenantRegistrationController extends Controller
                     }
                 },
             ],
-            'package' => ['required', Rule::in(['pro', 'starter', 'enterprise'])],
+            'package' => ['required', Rule::in(array_keys($packageCatalog->all()))],
         ], [
             'subdomain.regex' => 'Subdomain hanya boleh berisi huruf, angka, dan tanda hubung.',
         ]);

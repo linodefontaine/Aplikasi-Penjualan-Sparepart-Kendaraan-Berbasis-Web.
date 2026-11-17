@@ -4,6 +4,7 @@ namespace App\Modules\Workshop\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Modules\Platform\Services\TenantPackageCatalog;
 use App\Modules\Workshop\Payments\Exceptions\GatewayUnavailableException;
 use App\Modules\Workshop\Payments\PaymentService;
 use Illuminate\Database\Query\Builder;
@@ -66,33 +67,63 @@ class OwnerOperationsController extends Controller
     {
         $tenant = $this->currentTenant();
 
-        $data = $tenant->run(fn (): array => [
-            'parts' => DB::table('spare_parts')
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->limit(100)
-                ->get(['id', 'sku', 'name', 'stock', 'price', 'unit']),
-            'services' => DB::table('service_catalog')
-                ->where('is_active', true)
-                ->orderBy('name')
-                ->limit(100)
-                ->get(['id', 'service_code', 'name', 'price', 'estimated_duration_minutes']),
-            'customers' => DB::table('customers')
-                ->orderBy('name')
-                ->limit(100)
-                ->get(['id', 'name', 'phone']),
-            'recentSales' => DB::table('sales')
-                ->leftJoin('customers', 'customers.id', '=', 'sales.customer_id')
+        $data = $tenant->run(function (): array {
+            $pendingOrders = DB::table('sales')
+                ->join('customers', 'customers.id', '=', 'sales.customer_id')
+                ->join('payments', 'payments.sale_id', '=', 'sales.id')
+                ->where('sales.status', 'pending')
+                ->whereNotNull('sales.fulfillment_method')
+                ->whereNotNull('customers.central_user_id')
+                ->where('payments.status', 'pending')
                 ->latest('sales.created_at')
-                ->limit(10)
+                ->limit(30)
                 ->get([
+                    'sales.id',
                     'sales.invoice_number',
-                    'sales.status',
                     'sales.total',
-                    'sales.sold_at',
+                    'sales.fulfillment_method',
+                    'sales.delivery_address',
+                    'sales.fulfillment_fee',
+                    'sales.created_at',
                     'customers.name as customer_name',
-                ]),
-        ]);
+                    'customers.phone as customer_phone',
+                    'payments.payment_method',
+                ]);
+            $pendingOrderItems = DB::table('sale_items')
+                ->whereIn('sale_id', $pendingOrders->pluck('id'))
+                ->get(['sale_id', 'item_name', 'quantity', 'subtotal'])
+                ->groupBy('sale_id');
+
+            return [
+                'parts' => DB::table('spare_parts')
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'sku', 'name', 'stock', 'price', 'unit']),
+                'services' => DB::table('service_catalog')
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'service_code', 'name', 'price', 'estimated_duration_minutes']),
+                'customers' => DB::table('customers')
+                    ->orderBy('name')
+                    ->limit(100)
+                    ->get(['id', 'name', 'phone']),
+                'pendingOrders' => $pendingOrders,
+                'pendingOrderItems' => $pendingOrderItems,
+                'recentSales' => DB::table('sales')
+                    ->leftJoin('customers', 'customers.id', '=', 'sales.customer_id')
+                    ->latest('sales.created_at')
+                    ->limit(10)
+                    ->get([
+                        'sales.invoice_number',
+                        'sales.status',
+                        'sales.total',
+                        'sales.sold_at',
+                        'customers.name as customer_name',
+                    ]),
+            ];
+        });
 
         return view('tenant.kasir', [
             'tenantName' => $tenant->getAttribute('tenant_name'),
@@ -223,7 +254,24 @@ class OwnerOperationsController extends Controller
                             ->lockForUpdate()
                             ->first();
 
-                        if ($part === null || (int) $part->stock < $quantity) {
+                        if ($part === null) {
+                            throw ValidationException::withMessages([
+                                'parts' => 'Sparepart tidak tersedia atau stoknya tidak mencukupi.',
+                            ]);
+                        }
+
+                        $reservedQuantity = DB::table('sale_items')
+                            ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                            ->join('customers', 'customers.id', '=', 'sales.customer_id')
+                            ->where('sale_items.spare_part_id', $part->id)
+                            ->where('sales.status', 'pending')
+                            ->whereNotNull('sales.fulfillment_method')
+                            ->whereNotNull('customers.central_user_id')
+                            ->lockForUpdate()
+                            ->get(['sale_items.quantity'])
+                            ->sum('quantity');
+
+                        if ((int) $part->stock - (int) $reservedQuantity < $quantity) {
                             throw ValidationException::withMessages([
                                 'parts' => 'Sparepart tidak tersedia atau stoknya tidak mencukupi.',
                             ]);
@@ -575,10 +623,13 @@ class OwnerOperationsController extends Controller
         ]);
     }
 
-    public function storeEmployee(Request $request): RedirectResponse
+    public function storeEmployee(Request $request, TenantPackageCatalog $packageCatalog): RedirectResponse
     {
         $tenant = $this->currentTenant();
-        $tenant->run(function () use ($request): void {
+        $employeeLimit = $packageCatalog->employeeLimit($tenant->getAttribute('package'));
+        $packageName = $tenant->getAttribute('package');
+
+        $tenant->run(function () use ($request, $employeeLimit, $packageName): void {
             $validated = $request->validate([
                 'employee_code' => ['nullable', 'string', 'max:255', Rule::unique('employees', 'employee_code')],
                 'name' => ['required', 'string', 'max:255'],
@@ -587,6 +638,16 @@ class OwnerOperationsController extends Controller
                 'position' => ['required', 'string', 'max:100'],
                 'specialization' => ['nullable', 'string', 'max:255'],
             ]);
+
+            if ($employeeLimit !== null && DB::table('employees')->where('status', 'active')->count() >= $employeeLimit) {
+                throw ValidationException::withMessages([
+                    'name' => sprintf(
+                        'Paket %s membatasi maksimal %d karyawan/mekanik aktif.',
+                        ucfirst($packageName),
+                        $employeeLimit,
+                    ),
+                ]);
+            }
 
             DB::table('employees')->insert([
                 ...$validated,
@@ -644,6 +705,7 @@ class OwnerOperationsController extends Controller
             'sku' => ['required', 'string', 'max:255', Rule::unique('spare_parts', 'sku')],
             'name' => ['required', 'string', 'max:255'],
             'stock' => ['required', 'integer', 'min:0'],
+            'purchase_price' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'category' => ['nullable', 'string', 'max:255'],
             'unit' => ['required', 'string', 'max:50'],
@@ -658,6 +720,7 @@ class OwnerOperationsController extends Controller
                     'sku' => Str::upper(trim($validated['sku'])),
                     'name' => trim($validated['name']),
                     'stock' => $stock,
+                    'purchase_price' => $validated['purchase_price'] ?? 0,
                     'price' => $validated['price'],
                     'category' => $validated['category'] ?? null,
                     'unit' => $validated['unit'],

@@ -19,9 +19,17 @@ class PasswordResetControllerTest extends TestCase
         $user = User::factory()->create([
             'email' => 'reset@example.com',
             'password' => 'old-password',
+            'role' => 'Pelanggan',
         ]);
 
-        $this->post(route('password.email'), ['email' => $user->email])
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee(route('password.request'));
+        $this->get(route('password.request'))
+            ->assertOk()
+            ->assertSee('AMAHAY')
+            ->assertSee('Kirim tautan reset');
+        $this->post(route('password.email'), ['email' => 'RESET@EXAMPLE.COM'])
             ->assertRedirect()
             ->assertSessionHas('status', 'Jika alamat email terdaftar, tautan untuk mengatur ulang password akan dikirim.');
 
@@ -31,14 +39,18 @@ class PasswordResetControllerTest extends TestCase
 
             return true;
         });
+        $this->assertDatabaseHas('password_reset_tokens', [
+            'email' => $user->email,
+        ]);
 
         $this->get(route('password.reset', ['token' => $token, 'email' => $user->email]))
             ->assertOk()
+            ->assertSee('AMAHAY')
             ->assertSee('Buat Password Baru');
 
         $this->post(route('password.update'), [
             'token' => $token,
-            'email' => $user->email,
+            'email' => 'RESET@EXAMPLE.COM',
             'password' => 'new-password',
             'password_confirmation' => 'new-password',
         ])->assertRedirect(route('login'))
@@ -46,6 +58,16 @@ class PasswordResetControllerTest extends TestCase
 
         $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
         $this->assertDatabaseCount('password_reset_tokens', 0);
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('Password berhasil diperbarui. Silakan masuk.');
+        $this->post(route('login.proses'), [
+            'email' => 'RESET@EXAMPLE.COM',
+            'password' => 'new-password',
+            'role' => 'user',
+        ])->assertRedirect(route('user.menu'));
+        $this->assertAuthenticatedAs($user->fresh());
     }
 
     public function test_phone_only_account_does_not_send_a_reset_link_to_its_placeholder_email(): void

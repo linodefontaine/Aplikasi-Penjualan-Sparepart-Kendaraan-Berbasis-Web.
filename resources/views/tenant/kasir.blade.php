@@ -47,6 +47,12 @@
                     <span>👥</span>
                     <span>Pelanggan & Mekanik</span>
                 </a>
+                @if (auth()->user()->role === 'Owner')
+                    <a href="{{ route('owner.settings') }}" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                        <span>🛍️</span>
+                        <span>Katalog & Pesanan</span>
+                    </a>
+                @endif
                 <a href="/owner/pengingat" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>🔔</span>
                     <span>Pengingat Service</span>
@@ -82,6 +88,9 @@
             <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
             <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
             <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
+            @if (auth()->user()->role === 'Owner')
+                <a href="{{ route('owner.settings') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.settings') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Katalog & Pesanan</a>
+            @endif
             <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
             <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
             <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Akun Utama</a>
@@ -202,6 +211,60 @@
                 </section>
             </div>
         </form>
+
+        <section class="space-y-4 border-t border-gray-800 p-4 sm:p-6 lg:p-8">
+            <div>
+                <h2 class="text-sm font-bold text-white">Pesanan Katalog Konsumen</h2>
+                <p class="mt-1 text-xs text-gray-400">Konfirmasi pembayaran setelah diterima. Stok akan berkurang setelah konfirmasi.</p>
+            </div>
+            <div class="grid gap-4 xl:grid-cols-2">
+                @forelse ($pendingOrders as $order)
+                    <article class="space-y-4 rounded-2xl border border-gray-800 bg-[#111827] p-5 shadow-lg">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="font-mono text-xs font-bold text-blue-400">{{ $order->invoice_number }}</p>
+                                <p class="mt-1 text-xs font-semibold text-white">{{ $order->customer_name }}</p>
+                                @if ($order->customer_phone)
+                                    <p class="mt-1 text-[11px] text-gray-400">{{ $order->customer_phone }}</p>
+                                @endif
+                            </div>
+                            <span class="rounded-lg bg-yellow-500/10 px-2 py-1 text-[10px] font-medium text-yellow-300">Menunggu pembayaran</span>
+                        </div>
+
+                        <div class="space-y-2 border-y border-gray-800 py-3 text-xs">
+                            @foreach ($pendingOrderItems->get($order->id, collect()) as $item)
+                                <div class="flex justify-between gap-3 text-gray-300">
+                                    <span>{{ $item->item_name }} × {{ number_format($item->quantity, 0, ',', '.') }}</span>
+                                    <span class="shrink-0">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="space-y-1 text-[11px] text-gray-400">
+                            <p>Pemenuhan: {{ ['pickup' => 'Ambil di bengkel', 'delivery' => 'Diantar bengkel', 'shipping' => 'Dikirim paket'][$order->fulfillment_method] ?? $order->fulfillment_method }}</p>
+                            @if ($order->delivery_address)
+                                <p>Alamat: {{ $order->delivery_address }}</p>
+                            @endif
+                            <p>Metode pembayaran: {{ ['cash' => 'Tunai', 'bank_transfer' => 'Transfer bank', 'qris' => 'QRIS', 'e_wallet' => 'E-wallet'][$order->payment_method] ?? $order->payment_method }}</p>
+                            <p class="pt-1 text-sm font-bold text-green-400">Total Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+                        </div>
+
+                        @if (in_array(auth()->user()->role, ['Owner', 'Kasir'], true))
+                            <form method="POST" action="{{ route('owner.kasir.pesanan.confirm', ['sale' => $order->id]) }}">
+                                @csrf
+                                <button type="submit" class="w-full rounded-xl bg-green-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-green-700">
+                                    Konfirmasi pembayaran & kurangi stok
+                                </button>
+                            </form>
+                        @endif
+                    </article>
+                @empty
+                    <p class="rounded-xl border border-dashed border-gray-700 bg-[#111827] px-4 py-8 text-center text-xs text-gray-400 xl:col-span-2">
+                        Belum ada pesanan sparepart dari konsumen.
+                    </p>
+                @endforelse
+            </div>
+        </section>
     </main>
 
     <script>
