@@ -204,8 +204,12 @@ class CustomerJourneysTest extends TestCase
             'password_confirmation' => 'password123',
         ])->assertRedirect(route('user.menu'));
 
-        $this->post(route('tenant.store'), $tenant)
-            ->assertRedirect(route('owner.home'));
+        $registrationResponse = $this->post(route('tenant.store'), $tenant);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
+        ])->assertRedirect(route('owner.home'));
 
         return Tenant::query()->findOrFail(auth()->user()->tenant_id);
     }

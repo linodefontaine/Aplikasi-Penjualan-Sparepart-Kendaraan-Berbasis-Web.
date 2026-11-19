@@ -12,11 +12,11 @@
 <body class="bg-[#0b0f19] text-gray-200 min-h-screen font-sans flex">
 
     <!-- Sidebar Super Admin -->
-    <aside class="w-64 bg-[#111827] border-r border-gray-800 flex flex-col justify-between hidden md:flex">
+    <aside class="w-64 bg-[#111827] border-r border-gray-700 flex flex-col justify-between hidden md:flex">
         <div>
             <!-- Brand / Logo -->
-            <div class="h-16 flex items-center px-6 border-b border-gray-800 space-x-3">
-                <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+            <div class="h-16 flex items-center px-6 border-b border-gray-700 space-x-3">
+                <div class="w-7 h-7 bg-amber-700 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Footer Sidebar (Info Sistem + Tombol Logout) -->
-        <div class="p-4 border-t border-gray-800 space-y-3">
+        <div class="p-4 border-t border-gray-700 space-y-3">
             <div class="text-[10px] text-gray-500">
                 Sistem Multi-Tenant v1.0<br>Super Admin Access
             </div>
@@ -74,16 +74,16 @@
     <main class="flex-1 flex min-w-0 flex-col min-h-screen">
 
         <!-- Top Navbar -->
-        <header class="min-h-16 bg-[#111827] border-b border-gray-800 flex items-center justify-between gap-3 px-4 py-3 sm:px-8">
+        <header class="min-h-16 bg-[#111827] border-b border-gray-700 flex items-center justify-between gap-3 px-4 py-3 sm:px-8">
             <h1 class="text-xs font-semibold text-gray-300 tracking-wide uppercase">Manajemen Tenant</h1>
             <div
-                class="flex shrink-0 items-center space-x-2 bg-[#1f2937] px-3 py-1.5 rounded-full border border-gray-800 text-xs">
+                class="flex shrink-0 items-center space-x-2 bg-[#1f2937] px-3 py-1.5 rounded-full border border-gray-700 text-xs">
                 <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                <a href="{{ route('superadmin.profile.edit') }}" class="text-white font-medium hover:text-blue-300">{{ auth()->user()->name }}</a>
+                <a href="{{ route('superadmin.profile.edit') }}" class="text-white font-medium hover:text-amber-200">{{ auth()->user()->name }}</a>
             </div>
         </header>
 
-        <nav class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800 bg-[#111827] px-4 py-3 text-xs text-gray-400">
+        <nav class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-700 bg-[#111827] px-4 py-3 text-xs text-gray-400">
             <a href="{{ route('superadmin.home') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Dashboard</a>
             <a href="{{ route('superadmin.tenant') }}" class="shrink-0 rounded-lg bg-[#1f2937] px-3 py-2 text-white">Tenant</a>
             <a href="{{ route('superadmin.laporan') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Laporan</a>
@@ -111,15 +111,15 @@
                     <p class="text-xs text-gray-400 mt-0.5">Kelola daftar tenant yang terdaftar pada platform.</p>
                 </div>
                 <a href="{{ route('register') }}"
-                    class="inline-flex w-fit items-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">
+                    class="inline-flex w-fit items-center bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">
                     + Daftarkan Bengkel Baru
                 </a>
             </div>
 
-            <div class="hidden md:block bg-[#111827] border border-gray-800 rounded-2xl overflow-x-auto shadow-lg">
+            <div class="hidden md:block bg-[#111827] border border-gray-700 rounded-2xl overflow-x-auto shadow-lg">
                 <table class="w-full min-w-[760px] text-left text-xs text-gray-300">
                     <thead
-                        class="bg-[#161e2e] text-gray-400 uppercase text-[10px] tracking-wider border-b border-gray-800">
+                        class="bg-[#1f2937] text-gray-400 uppercase text-[10px] tracking-wider border-b border-gray-700">
                         <tr>
                             <th class="px-6 py-3.5">Identitas Bengkel</th>
                             <th class="px-6 py-3.5">Kontak Pemilik</th>
@@ -138,7 +138,7 @@
                                     default => ['AKTIF', 'border-green-500/30 bg-green-500/20 text-green-400'],
                                 };
                             @endphp
-                            <tr class="hover:bg-[#161e2e]/50 transition">
+                            <tr class="hover:bg-[#1f2937]/50 transition">
                                 <td class="px-6 py-4">
                                     <p class="font-bold text-white">{{ $tenant->getAttribute('tenant_name') }}</p>
                                     <p class="text-[10px] text-gray-400">
@@ -158,25 +158,25 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <details class="min-w-52">
-                                        <summary class="cursor-pointer text-xs font-medium text-blue-400 hover:text-blue-300">Kelola tenant</summary>
+                                        <summary class="cursor-pointer text-xs font-medium text-amber-300 hover:text-amber-200">Kelola tenant</summary>
                                         <div class="mt-3 space-y-3">
                                             <form action="{{ route('superadmin.tenant.status', $tenant) }}" method="POST" class="space-y-2">
                                                 @csrf
                                                 @method('PATCH')
                                                 <label class="sr-only" for="tenant-status-{{ $tenant->getTenantKey() }}">Status tenant</label>
-                                                <select id="tenant-status-{{ $tenant->getTenantKey() }}" name="status" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-2 py-2 text-[11px] text-white">
+                                                <select id="tenant-status-{{ $tenant->getTenantKey() }}" name="status" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-2 py-2 text-[11px] text-white">
                                                     <option value="active" @selected($status === 'active')>Aktifkan</option>
                                                     <option value="inactive" @selected($status === 'inactive')>Nonaktifkan</option>
                                                     <option value="banned" @selected($status === 'banned')>Blokir</option>
                                                 </select>
-                                                <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-2 py-2 text-[11px] text-white placeholder-gray-500">
-                                                <button type="submit" class="w-full rounded-lg bg-blue-600 px-3 py-2 text-[11px] font-medium text-white hover:bg-blue-700">Simpan status</button>
+                                                <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-2 py-2 text-[11px] text-white placeholder-gray-500">
+                                                <button type="submit" class="w-full rounded-lg bg-amber-700 px-3 py-2 text-[11px] font-medium text-white hover:bg-amber-800">Simpan status</button>
                                             </form>
-                                            <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-800 pt-3">
+                                            <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-700 pt-3">
                                                 @csrf
                                                 @method('DELETE')
                                                 <label class="block text-[10px] text-red-300">Hapus permanen — ketik nama bengkel</label>
-                                                <input type="text" name="confirmation" required autocomplete="off" class="w-full rounded-lg border border-red-900 bg-[#161e2e] px-2 py-2 text-[11px] text-white">
+                                                <input type="text" name="confirmation" required autocomplete="off" class="w-full rounded-lg border border-red-900 bg-[#1f2937] px-2 py-2 text-[11px] text-white">
                                                 <button type="submit" class="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-[11px] font-medium text-red-300 hover:bg-red-500/20">Hapus tenant & database</button>
                                             </form>
                                         </div>
@@ -204,7 +204,7 @@
                             default => ['AKTIF', 'border-green-500/30 bg-green-500/20 text-green-400'],
                         };
                     @endphp
-                    <article class="rounded-2xl border border-gray-800 bg-[#111827] p-5 shadow-lg">
+                    <article class="rounded-2xl border border-gray-700 bg-[#111827] p-5 shadow-lg">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <h3 class="break-words text-sm font-bold text-white">{{ $tenant->getAttribute('tenant_name') }}</h3>
@@ -232,25 +232,25 @@
                                 <dd class="mt-1 break-all text-gray-200">{{ $tenant->domains->first()?->domain ?? 'Belum tersedia' }}</dd>
                             </div>
                         </dl>
-                        <details class="mt-5 border-t border-gray-800 pt-4">
-                            <summary class="cursor-pointer text-xs font-medium text-blue-400">Tindakan moderator</summary>
+                        <details class="mt-5 border-t border-gray-700 pt-4">
+                            <summary class="cursor-pointer text-xs font-medium text-amber-300">Tindakan moderator</summary>
                             <div class="mt-3 space-y-3">
                                 <form action="{{ route('superadmin.tenant.status', $tenant) }}" method="POST" class="space-y-2">
                                     @csrf
                                     @method('PATCH')
-                                    <select name="status" aria-label="Status tenant" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2 text-xs text-white">
+                                    <select name="status" aria-label="Status tenant" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                         <option value="active" @selected($status === 'active')>Aktifkan</option>
                                         <option value="inactive" @selected($status === 'inactive')>Nonaktifkan</option>
                                         <option value="banned" @selected($status === 'banned')>Blokir</option>
                                     </select>
-                                    <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2 text-xs text-white placeholder-gray-500">
-                                    <button type="submit" class="w-full rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700">Simpan status</button>
+                                    <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white placeholder-gray-500">
+                                    <button type="submit" class="w-full rounded-lg bg-amber-700 px-3 py-2 text-xs font-medium text-white hover:bg-amber-800">Simpan status</button>
                                 </form>
-                                <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-800 pt-3">
+                                <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-700 pt-3">
                                     @csrf
                                     @method('DELETE')
                                     <label class="block text-[10px] text-red-300">Hapus permanen — ketik nama bengkel</label>
-                                    <input type="text" name="confirmation" required autocomplete="off" class="w-full rounded-lg border border-red-900 bg-[#161e2e] px-3 py-2 text-xs text-white">
+                                    <input type="text" name="confirmation" required autocomplete="off" class="w-full rounded-lg border border-red-900 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                     <button type="submit" class="w-full rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-500/20">Hapus tenant & database</button>
                                 </form>
                             </div>
