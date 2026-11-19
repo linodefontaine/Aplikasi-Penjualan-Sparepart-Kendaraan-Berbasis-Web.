@@ -343,10 +343,15 @@ class TenantMarketplaceTest extends TestCase
             'password_confirmation' => 'password123',
         ])->assertRedirect(route('user.menu'));
 
-        $this->post(route('tenant.store'), [
+        $registrationResponse = $this->post(route('tenant.store'), [
             'tenant_name' => 'Bengkel Marketplace '.$suffix,
             'subdomain' => 'marketplace-'.$suffix,
             'package' => 'starter',
+        ]);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
         ])->assertRedirect(route('owner.home'));
 
         return Tenant::query()->findOrFail(auth()->user()->tenant_id);

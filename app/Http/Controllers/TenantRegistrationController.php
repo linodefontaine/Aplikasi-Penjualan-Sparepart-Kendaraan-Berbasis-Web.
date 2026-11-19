@@ -20,7 +20,9 @@ class TenantRegistrationController extends Controller
             return $redirect;
         }
 
-        return view('auth.register');
+        return view('auth.register', [
+            'tenantBaseDomain' => $this->tenantBaseDomain($request),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -31,6 +33,7 @@ class TenantRegistrationController extends Controller
 
         $user = $request->user();
         abort_unless($user->role === 'Pelanggan' && $user->tenant_id === null, 403);
+        $baseDomain = $this->tenantBaseDomain($request);
 
         $validated = $request->validate([
             'tenant_name' => ['required', 'string', 'max:255'],
@@ -40,8 +43,8 @@ class TenantRegistrationController extends Controller
                 'string',
                 'max:63',
                 'regex:/\A[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\z/i',
-                function (string $attribute, mixed $value, Closure $fail): void {
-                    $domain = Str::lower((string) $value).'.autozone.pro';
+                function (string $attribute, mixed $value, Closure $fail) use ($baseDomain): void {
+                    $domain = Str::lower((string) $value).'.'.$baseDomain;
 
                     if (Domain::where('domain', $domain)->exists()) {
                         $fail('Domain tersebut sudah digunakan.');
@@ -60,8 +63,8 @@ class TenantRegistrationController extends Controller
             'package' => $validated['package'],
         ]);
 
-        DB::transaction(function () use ($validated, $tenant, $user): void {
-            $tenant->createDomain(Str::lower($validated['subdomain']).'.autozone.pro');
+        DB::transaction(function () use ($validated, $tenant, $user, $baseDomain): void {
+            $tenant->createDomain(Str::lower($validated['subdomain']).'.'.$baseDomain);
 
             $user->update([
                 'role' => 'Owner',
@@ -85,5 +88,12 @@ class TenantRegistrationController extends Controller
             'Super Admin' => redirect()->route('superadmin.home'),
             default => $user->tenant_id === null ? null : abort(403),
         };
+    }
+
+    private function tenantBaseDomain(Request $request): string
+    {
+        $baseDomain = trim((string) config('tenancy.base_domain'));
+
+        return Str::lower($baseDomain !== '' ? $baseDomain : $request->getHost());
     }
 }

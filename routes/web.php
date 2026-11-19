@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\OwnerOperationsController as LegacyOwnerOperationsController;
 use App\Http\Controllers\TenantStorefrontController;
+use App\Modules\Billing\Http\Controllers\SubscriptionBillingController;
 use App\Modules\Customer\Http\Controllers\CustomerBookingController;
 use App\Modules\Customer\Http\Controllers\CustomerDirectoryController;
 use App\Modules\Customer\Http\Controllers\CustomerProfileController;
@@ -61,6 +62,15 @@ Route::middleware(['auth'])->prefix('tenant')->name('tenant.')->group(function (
     Route::post('/create', [TenantRegistrationController::class, 'store'])->name('store');
 });
 
+Route::middleware(['auth', 'role:Owner'])->prefix('tenant')->name('tenant.')->group(function () {
+    Route::get('/checkout/{invoice}', [SubscriptionBillingController::class, 'checkout'])
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('checkout.show');
+    Route::post('/checkout/{invoice}/simulasi', [SubscriptionBillingController::class, 'simulate'])
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('checkout.simulate');
+});
+
 /*
 |--------------------------------------------------------------------------
 | AREA KONSUMEN / PENGGUNA BENGKEL
@@ -106,6 +116,9 @@ Route::middleware(['auth', 'role:Pelanggan,Owner'])->prefix('user-menu')->name('
 Route::middleware(['auth', 'role:Owner,Kasir,Mekanik', 'tenant.active'])->prefix('owner')->name('owner.')->group(function () {
 
     Route::get('/dashboard', OwnerDashboardController::class)->name('home');
+    Route::get('/langganan', [SubscriptionBillingController::class, 'index'])
+        ->middleware('role:Owner')
+        ->name('subscription');
 
     Route::get('/antrean', [OwnerOperationsController::class, 'queue'])->name('antrean');
 

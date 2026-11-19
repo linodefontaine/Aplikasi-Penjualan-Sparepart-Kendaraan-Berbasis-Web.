@@ -29,16 +29,16 @@ class WorkshopSampleDataSeeder extends Seeder
     {
         DB::transaction(function (): void {
             $parts = [
-                ['sku' => 'SAMPLE-OLI-MPX2', 'name' => 'Oli Mesin MPX2 0.8L', 'category' => 'Oli Mesin', 'unit' => 'botol', 'stock' => 12, 'minimum_stock' => 3, 'location' => 'A-01', 'purchase_price' => 42000, 'price' => 58000],
-                ['sku' => 'SAMPLE-KAMPAS-DEPAN', 'name' => 'Kampas Rem Depan', 'category' => 'Sistem Rem', 'unit' => 'set', 'stock' => 2, 'minimum_stock' => 3, 'location' => 'B-02', 'purchase_price' => 52000, 'price' => 85000],
-                ['sku' => 'SAMPLE-BUSI-NGK', 'name' => 'Busi NGK CPR6EA-9', 'category' => 'Pengapian', 'unit' => 'pcs', 'stock' => 0, 'minimum_stock' => 2, 'location' => 'C-01', 'purchase_price' => 16000, 'price' => 28000],
-                ['sku' => 'SAMPLE-FILTER-UDARA', 'name' => 'Filter Udara Vario 160', 'category' => 'Filter', 'unit' => 'pcs', 'stock' => 8, 'minimum_stock' => 2, 'location' => 'C-02', 'purchase_price' => 52000, 'price' => 75000],
-                ['sku' => 'SAMPLE-VBELT-BEAT', 'name' => 'V-Belt Honda BeAT', 'category' => 'Transmisi', 'unit' => 'pcs', 'stock' => 6, 'minimum_stock' => 2, 'location' => 'D-01', 'purchase_price' => 95000, 'price' => 135000],
-                ['sku' => 'SAMPLE-AKI-GTZ5S', 'name' => 'Aki Kering GTZ5S', 'category' => 'Kelistrikan', 'unit' => 'pcs', 'stock' => 7, 'minimum_stock' => 2, 'location' => 'E-01', 'purchase_price' => 145000, 'price' => 185000],
-                ['sku' => 'SAMPLE-OLI-GARDAN', 'name' => 'Oli Gardan 120ml', 'category' => 'Oli Mesin', 'unit' => 'tube', 'stock' => 10, 'minimum_stock' => 3, 'location' => 'A-02', 'purchase_price' => 12000, 'price' => 20000],
-                ['sku' => 'SAMPLE-LAMPU-LED', 'name' => 'Lampu Depan LED Motor', 'category' => 'Kelistrikan', 'unit' => 'pcs', 'stock' => 5, 'minimum_stock' => 2, 'location' => 'E-02', 'purchase_price' => 68000, 'price' => 98000],
-                ['sku' => 'SAMPLE-KAMPAS-BELAKANG', 'name' => 'Kampas Rem Belakang', 'category' => 'Sistem Rem', 'unit' => 'set', 'stock' => 6, 'minimum_stock' => 2, 'location' => 'B-03', 'purchase_price' => 38000, 'price' => 65000],
-                ['sku' => 'SAMPLE-RANTAI-GEAR', 'name' => 'Set Rantai dan Gear', 'category' => 'Transmisi', 'unit' => 'set', 'stock' => 4, 'minimum_stock' => 2, 'location' => 'D-02', 'purchase_price' => 125000, 'price' => 175000],
+                ['sku' => 'OLI-MPX2', 'name' => 'Oli Mesin MPX2 0.8L', 'category' => 'Oli Mesin', 'unit' => 'botol', 'stock' => 12, 'minimum_stock' => 3, 'location' => 'A-01', 'purchase_price' => 42000, 'price' => 58000],
+                ['sku' => 'KAMPAS-DEPAN', 'name' => 'Kampas Rem Depan', 'category' => 'Sistem Rem', 'unit' => 'set', 'stock' => 2, 'minimum_stock' => 3, 'location' => 'B-02', 'purchase_price' => 52000, 'price' => 85000],
+                ['sku' => 'BUSI-NGK', 'name' => 'Busi NGK CPR6EA-9', 'category' => 'Pengapian', 'unit' => 'pcs', 'stock' => 0, 'minimum_stock' => 2, 'location' => 'C-01', 'purchase_price' => 16000, 'price' => 28000],
+                ['sku' => 'FILTER-UDARA', 'name' => 'Filter Udara Vario 160', 'category' => 'Filter', 'unit' => 'pcs', 'stock' => 8, 'minimum_stock' => 2, 'location' => 'C-02', 'purchase_price' => 52000, 'price' => 75000],
+                ['sku' => 'VBELT-BEAT', 'name' => 'V-Belt Honda BeAT', 'category' => 'Transmisi', 'unit' => 'pcs', 'stock' => 6, 'minimum_stock' => 2, 'location' => 'D-01', 'purchase_price' => 95000, 'price' => 135000],
+                ['sku' => 'AKI-GTZ5S', 'name' => 'Aki Kering GTZ5S', 'category' => 'Kelistrikan', 'unit' => 'pcs', 'stock' => 7, 'minimum_stock' => 2, 'location' => 'E-01', 'purchase_price' => 145000, 'price' => 185000],
+                ['sku' => 'OLI-GARDAN', 'name' => 'Oli Gardan 120ml', 'category' => 'Oli Mesin', 'unit' => 'tube', 'stock' => 10, 'minimum_stock' => 3, 'location' => 'A-02', 'purchase_price' => 12000, 'price' => 20000],
+                ['sku' => 'LAMPU-LED', 'name' => 'Lampu Depan LED Motor', 'category' => 'Kelistrikan', 'unit' => 'pcs', 'stock' => 5, 'minimum_stock' => 2, 'location' => 'E-02', 'purchase_price' => 68000, 'price' => 98000],
+                ['sku' => 'KAMPAS-BELAKANG', 'name' => 'Kampas Rem Belakang', 'category' => 'Sistem Rem', 'unit' => 'set', 'stock' => 6, 'minimum_stock' => 2, 'location' => 'B-03', 'purchase_price' => 38000, 'price' => 65000],
+                ['sku' => 'RANTAI-GEAR', 'name' => 'Set Rantai dan Gear', 'category' => 'Transmisi', 'unit' => 'set', 'stock' => 4, 'minimum_stock' => 2, 'location' => 'D-02', 'purchase_price' => 125000, 'price' => 175000],
             ];
             $partIds = [];
 
@@ -51,9 +51,9 @@ class WorkshopSampleDataSeeder extends Seeder
             }
 
             $employees = [
-                ['employee_code' => 'SAMPLE-MEK-01', 'name' => 'Anton Pratama', 'phone' => '081200000101', 'position' => 'mechanic', 'specialization' => 'Servis mesin'],
-                ['employee_code' => 'SAMPLE-MEK-02', 'name' => 'Budi Santoso', 'phone' => '081200000102', 'position' => 'mechanic', 'specialization' => 'Sistem rem dan transmisi'],
-                ['employee_code' => 'SAMPLE-KSR-01', 'name' => 'Siti Rahma', 'phone' => '081200000103', 'position' => 'cashier', 'specialization' => null],
+                ['employee_code' => 'MEK-01', 'name' => 'Anton Pratama', 'phone' => '081200000101', 'position' => 'mechanic', 'specialization' => 'Servis mesin'],
+                ['employee_code' => 'MEK-02', 'name' => 'Budi Santoso', 'phone' => '081200000102', 'position' => 'mechanic', 'specialization' => 'Sistem rem dan transmisi'],
+                ['employee_code' => 'KSR-01', 'name' => 'Siti Rahma', 'phone' => '081200000103', 'position' => 'cashier', 'specialization' => null],
             ];
             $employeeIds = [];
 
@@ -128,10 +128,10 @@ class WorkshopSampleDataSeeder extends Seeder
             }
 
             $orders = [
-                ['number' => 'SAMPLE-WO-001', 'invoice' => 'SAMPLE-INV-001', 'customer' => '081200000201', 'vehicle' => 'D 1234 AMH', 'mechanic' => 'SAMPLE-MEK-01', 'service' => 'SAMPLE-SRV-OLI', 'parts' => ['SAMPLE-OLI-MPX2' => 1], 'days_ago' => 1],
-                ['number' => 'SAMPLE-WO-002', 'invoice' => 'SAMPLE-INV-002', 'customer' => '081200000202', 'vehicle' => 'D 5678 XZ', 'mechanic' => 'SAMPLE-MEK-02', 'service' => 'SAMPLE-SRV-REM', 'parts' => ['SAMPLE-KAMPAS-DEPAN' => 1], 'days_ago' => 2],
-                ['number' => 'SAMPLE-WO-003', 'invoice' => 'SAMPLE-INV-003', 'customer' => '081200000203', 'vehicle' => 'B 3210 WQ', 'mechanic' => 'SAMPLE-MEK-01', 'service' => 'SAMPLE-SRV-TUNE', 'parts' => ['SAMPLE-BUSI-NGK' => 1, 'SAMPLE-FILTER-UDARA' => 1], 'days_ago' => 3],
-                ['number' => 'SAMPLE-WO-004', 'invoice' => 'SAMPLE-INV-004', 'customer' => '081200000201', 'vehicle' => 'D 1234 AMH', 'mechanic' => 'SAMPLE-MEK-02', 'service' => 'SAMPLE-SRV-AKI', 'parts' => ['SAMPLE-AKI-GTZ5S' => 1], 'days_ago' => 5],
+                ['number' => 'SAMPLE-WO-001', 'invoice' => 'INV-001', 'customer' => '081200000201', 'vehicle' => 'D 1234 AMH', 'mechanic' => 'MEK-01', 'service' => 'SRV-OLI', 'parts' => ['OLI-MPX2' => 1], 'days_ago' => 1],
+                ['number' => 'SAMPLE-WO-002', 'invoice' => 'INV-002', 'customer' => '081200000202', 'vehicle' => 'D 5678 XZ', 'mechanic' => 'MEK-02', 'service' => 'SRV-REM', 'parts' => ['KAMPAS-DEPAN' => 1], 'days_ago' => 2],
+                ['number' => 'SAMPLE-WO-003', 'invoice' => 'INV-003', 'customer' => '081200000203', 'vehicle' => 'B 3210 WQ', 'mechanic' => 'MEK-01', 'service' => 'SRV-TUNE', 'parts' => ['BUSI-NGK' => 1, 'FILTER-UDARA' => 1], 'days_ago' => 3],
+                ['number' => 'SAMPLE-WO-004', 'invoice' => 'INV-004', 'customer' => '081200000201', 'vehicle' => 'D 1234 AMH', 'mechanic' => 'MEK-02', 'service' => 'SRV-AKI', 'parts' => ['AKI-GTZ5S' => 1], 'days_ago' => 5],
             ];
 
             foreach ($orders as $order) {

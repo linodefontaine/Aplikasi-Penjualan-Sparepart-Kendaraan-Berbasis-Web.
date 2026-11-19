@@ -118,7 +118,7 @@ Untuk setup MySQL, gunakan konfigurasi database seperti `DB_HOST`, `DB_PORT`, `D
 
 Project ini menggunakan struktur multi-tenant dengan database pusat dan database operasional per tenant. Saat tenant dibuat dari aplikasi, database tenant akan dipersiapkan otomatis berdasarkan konfigurasi tenancy.
 
-Subdomain pendaftaran saat ini menggunakan akhiran `.autozone.pro`. Untuk environment server, pastikan wildcard DNS dan konfigurasi reverse proxy/web server sudah siap agar subdomain tenant bisa diakses. Jika memakai domain lain, sesuaikan validasi pembuatan domain tenant di codebase dan konfigurasi tenancy-nya.
+Domain utama aplikasi adalah `https://yuma.yume.tech`. Domain tenant diatur melalui `TENANT_BASE_DOMAIN=yuma.yume.tech`, sehingga tenant akan menggunakan alamat seperti `namabengkel.yuma.yume.tech`. Jika variabel tersebut tidak diisi, aplikasi menggunakan host request saat ini. Untuk environment server, siapkan wildcard DNS dan konfigurasi reverse proxy/web server agar subdomain tenant bisa diakses.
 
 ## Struktur modular monolith
 
