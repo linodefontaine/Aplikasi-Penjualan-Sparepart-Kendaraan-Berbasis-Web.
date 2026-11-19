@@ -73,14 +73,12 @@
                         <span class="text-[10px] bg-blue-500/10 text-blue-400 font-semibold px-2.5 py-1 rounded-md">Bengkel Terdaftar</span>
                         <h1 class="text-xl md:text-2xl font-bold text-white mt-2">{{ $tenant->getAttribute('tenant_name') }}</h1>
                         <p class="text-xs text-gray-400 mt-1">{{ $tenant->domains->first()?->domain ?? 'Informasi domain belum tersedia' }}</p>
-                        @if ($tenant->getAttribute('address'))
-                            <p class="text-xs text-gray-300 mt-3">📍 {{ $tenant->getAttribute('address') }}</p>
-                        @endif
                     </div>
                     <div>
                         <span class="text-xs bg-green-500/10 text-green-400 font-semibold px-2.5 py-1 rounded">Aktif</span>
                         <p class="text-[11px] text-gray-400 mt-2">Jadwalkan servis melalui formulir booking</p>
-                        <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}" class="mt-3 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-blue-700">
+                        <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}"
+                            class="mt-3 inline-flex rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
                             Lihat Katalog Sparepart
                         </a>
                     </div>

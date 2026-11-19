@@ -12,13 +12,13 @@
 <body class="bg-[#0b0f19] text-gray-200 min-h-screen flex items-center justify-center font-sans">
 
     <!-- Card Container Login -->
-    <div class="bg-[#111827] border border-gray-800 p-10 rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="bg-[#111827] border border-gray-700 p-10 rounded-3xl shadow-2xl w-full max-w-md">
 
         <!-- Logo & Brand -->
         <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center space-x-2.5 mb-3">
                 <div
-                    class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                    class="w-10 h-10 bg-amber-700 rounded-xl flex items-center justify-center shadow-lg shadow-amber-900/30">
                     <!-- Icon Wrench / Kunci Pas Bengkel -->
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
@@ -43,10 +43,16 @@
             </p>
         </div>
 
+        @if (session('status'))
+            <p role="status" class="mb-4 rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">
+                {{ session('status') }}
+            </p>
+        @endif
+
         @if ($loginRole !== 'tenant')
-            <div class="grid grid-cols-2 gap-2 bg-[#1f2937] p-1.5 rounded-xl mb-6 border border-gray-800">
+            <div class="grid grid-cols-2 gap-2 bg-[#1f2937] p-1.5 rounded-xl mb-6 border border-gray-700">
                 <button type="button" id="btn-user" onclick="switchRole('user')"
-                    class="py-2.5 text-xs font-medium bg-blue-600 text-white rounded-lg shadow transition">Konsumen</button>
+                    class="py-2.5 text-xs font-medium bg-amber-700 text-white rounded-lg shadow transition">Konsumen</button>
                 <button type="button" id="btn-admin" onclick="switchRole('admin')"
                     class="py-2.5 text-xs font-medium text-gray-400 hover:text-white transition">Admin</button>
             </div>
@@ -69,33 +75,33 @@
                 <label class="block text-xs font-medium text-gray-300 mb-1.5">Username, Email atau No. WhatsApp</label>
                 <input type="text" name="email" value="{{ old('email') }}" placeholder="username, nama@email.com, atau 08123456789" required
                     autocomplete="username"
-                    class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition">
+                    class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition">
             </div>
 
             <div class="mt-4">
                 <label class="block text-xs font-medium text-gray-300 mb-1.5">Password</label>
                 <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password"
-                    class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition">
+                    class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition">
             </div>
 
             <div class="flex items-center justify-between text-xs text-gray-400 py-4">
                 <label class="flex items-center space-x-2 cursor-pointer">
                     <input type="checkbox" name="remember" value="1"
-                        class="rounded bg-[#1f2937] border-gray-700 text-blue-600 focus:ring-0 w-4 h-4">
+                        class="rounded bg-[#1f2937] border-gray-700 text-amber-300 focus:ring-0 w-4 h-4">
                     <span>Ingat saya</span>
                 </label>
-                <a href="{{ route('password.request') }}" class="text-blue-400 hover:underline">Lupa password?</a>
+                <a href="{{ route('password.request') }}" class="text-amber-300 hover:underline">Lupa password?</a>
             </div>
 
             <button type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-blue-600/30 transition duration-200 text-sm">
+                class="w-full bg-amber-700 hover:bg-amber-800 text-white font-medium py-3 rounded-xl shadow-lg shadow-amber-900/30 transition duration-200 text-sm">
                 Masuk ke Sistem
             </button>
         </form>
 
         <!-- Pembuatan tenant tersedia setelah pengguna membuat akun dan masuk -->
         <div class="text-center mt-6 text-xs text-gray-400">
-            Belum punya akun utama? <a href="{{ route('register') }}" class="text-blue-400 hover:underline font-medium">Buat akun</a>
+            Belum punya akun utama? <a href="{{ route('register') }}" class="text-amber-300 hover:underline font-medium">Buat akun</a>
         </div>
 
     </div>
@@ -109,7 +115,7 @@
                 const subtitle = document.getElementById('login-subtitle');
                 const selectedRole = document.getElementById('login-role');
                 const inactiveClass = "py-2.5 text-xs font-medium text-gray-400 hover:text-white transition";
-                const activeClass = "py-2.5 text-xs font-medium bg-blue-600 text-white rounded-lg shadow transition";
+                const activeClass = "py-2.5 text-xs font-medium bg-amber-700 text-white rounded-lg shadow transition";
 
                 btnUser.className = inactiveClass;
                 btnAdmin.className = inactiveClass;

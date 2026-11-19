@@ -9,21 +9,21 @@
 
     <style>
         :root {
-            --bg: #080f22;
-            --bg-soft: #0d1630;
-            --card: #111c38;
-            --card-light: #152242;
-            --border: rgba(255, 255, 255, 0.08);
+            --bg: #0b0f19;
+            --bg-soft: #111827;
+            --card: #111827;
+            --card-light: #1f2937;
+            --border: rgba(148, 163, 184, 0.24);
 
-            --blue: #2877ff;
-            --blue-light: #5c9aff;
+            --accent: #f59e0b;
+            --accent-light: #fcd34d;
             --green: #19c37d;
             --yellow: #f4c542;
             --red: #ff5c70;
             --purple: #9b7cff;
 
-            --text: #f4f7ff;
-            --muted: #8d9ab8;
+            --text: #f8fafc;
+            --muted: #cbd5e1;
         }
 
         * {
@@ -89,12 +89,12 @@
             width: 25px;
             height: 25px;
             border-radius: 6px;
-            background: linear-gradient(135deg, #4d8cff, #1f5edc);
+            background: linear-gradient(135deg, #fbbf24, #b45309);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            box-shadow: 0 0 20px rgba(40, 119, 255, .25);
+            color: #1c1917;
+            box-shadow: 0 0 20px rgba(245, 158, 11, .25);
             flex-shrink: 0;
         }
 
@@ -109,7 +109,7 @@
         }
 
         .brand em {
-            color: var(--blue-light);
+            color: var(--accent-light);
             font-style: normal;
         }
 
@@ -120,7 +120,7 @@
         }
 
         .nav-links a {
-            color: #8996b4;
+            color: #cbd5e1;
             font-size: 12px;
             transition: .2s;
         }
@@ -132,7 +132,7 @@
         .nav-login {
             padding: 9px 17px;
             border-radius: 6px;
-            background: #246ff2;
+            background: #b45309;
             color: white !important;
             font-weight: 600;
         }
@@ -146,8 +146,8 @@
             overflow: hidden;
             padding: 75px 0 65px;
             background:
-                radial-gradient(circle at 78% 38%, rgba(34, 100, 255, .13), transparent 28%),
-                radial-gradient(circle at 20% 30%, rgba(29, 78, 216, .08), transparent 28%),
+                radial-gradient(circle at 78% 38%, rgba(245, 158, 11, .13), transparent 28%),
+                radial-gradient(circle at 20% 30%, rgba(245, 158, 11, .08), transparent 28%),
                 var(--bg);
         }
 
@@ -166,7 +166,7 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            color: #6e9fff;
+            color: #fcd34d;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .8px;
@@ -178,7 +178,7 @@
             content: "";
             width: 18px;
             height: 1px;
-            background: var(--blue);
+            background: var(--accent);
         }
 
         .hero h1 {
@@ -190,7 +190,7 @@
         }
 
         .hero h1 span {
-            color: var(--blue-light);
+            color: var(--accent-light);
         }
 
         .hero-description {
@@ -219,24 +219,24 @@
         }
 
         .btn-primary {
-            background: var(--blue);
-            color: white;
-            box-shadow: 0 7px 22px rgba(40, 119, 255, .2);
+            background: var(--accent);
+            color: #1c1917;
+            box-shadow: 0 7px 22px rgba(245, 158, 11, .2);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            background: #3a83ff;
+            background: #fbbf24;
         }
 
         .btn-outline {
             border: 1px solid rgba(255, 255, 255, .12);
             background: rgba(255, 255, 255, .025);
-            color: #b9c4da;
+            color: #cbd5e1;
         }
 
         .btn-outline:hover {
-            border-color: rgba(40, 119, 255, .5);
+            border-color: rgba(245, 158, 11, .5);
             color: white;
         }
 
@@ -254,7 +254,7 @@
                 linear-gradient(145deg, rgba(20, 34, 68, .98), rgba(10, 19, 41, .98));
             box-shadow:
                 0 25px 60px rgba(0, 0, 0, .35),
-                0 0 50px rgba(40, 119, 255, .07);
+                0 0 50px rgba(245, 158, 11, .07);
         }
 
         .dashboard-top {
@@ -270,7 +270,7 @@
         }
 
         .dashboard-date {
-            color: #647391;
+            color: #94a3b8;
             font-size: 9px;
         }
 
@@ -306,8 +306,8 @@
         .bar {
             width: 18px;
             border-radius: 3px 3px 0 0;
-            background: linear-gradient(to top, #225dc8, #4c91ff);
-            box-shadow: 0 0 14px rgba(40, 119, 255, .18);
+            background: linear-gradient(to top, #92400e, #fbbf24);
+            box-shadow: 0 0 14px rgba(245, 158, 11, .18);
         }
 
         .bar:nth-child(1) {
@@ -354,7 +354,7 @@
 
         .mini-stat small {
             display: block;
-            color: #687895;
+            color: #94a3b8;
             font-size: 8px;
             margin-bottom: 4px;
         }
@@ -392,7 +392,7 @@
 
         .stat-card small {
             display: block;
-            color: #71809e;
+            color: #94a3b8;
             font-size: 9px;
             margin-bottom: 7px;
         }
@@ -404,7 +404,7 @@
 
         .stat-card p {
             margin-top: 5px;
-            color: #647391;
+            color: #94a3b8;
             font-size: 8px;
         }
 
@@ -427,7 +427,7 @@
         }
 
         .section-label {
-            color: #5c91ff;
+            color: #fcd34d;
             font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 1.1px;
@@ -453,7 +453,7 @@
         ===================================================== */
 
         .features {
-            background: #091226;
+            background: #0b0f19;
             border-top: 1px solid rgba(255, 255, 255, .025);
             border-bottom: 1px solid rgba(255, 255, 255, .025);
         }
@@ -468,14 +468,14 @@
             min-height: 170px;
             padding: 20px;
             border-radius: 8px;
-            background: #101b36;
+            background: #111827;
             border: 1px solid rgba(255, 255, 255, .06);
             transition: .2s;
         }
 
         .feature-card:hover {
             transform: translateY(-3px);
-            border-color: rgba(40, 119, 255, .3);
+            border-color: rgba(245, 158, 11, .3);
         }
 
         .feature-icon {
@@ -486,8 +486,8 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 15px;
-            background: rgba(40, 119, 255, .11);
-            color: #5593ff;
+            background: rgba(245, 158, 11, .11);
+            color: #fbbf24;
             font-size: 14px;
             font-weight: 700;
         }
@@ -513,7 +513,7 @@
         }
 
         .feature-card p {
-            color: #71809d;
+            color: #94a3b8;
             font-size: 9px;
             line-height: 1.65;
         }
@@ -537,7 +537,7 @@
         }
 
         .process-number {
-            color: #315fae;
+            color: #f59e0b;
             font-size: 25px;
             font-weight: 800;
             margin-bottom: 12px;
@@ -549,7 +549,7 @@
         }
 
         .process-card p {
-            color: #74819e;
+            color: #94a3b8;
             font-size: 9px;
             line-height: 1.7;
         }
@@ -560,8 +560,8 @@
 
         .pricing {
             background:
-                radial-gradient(circle at 50% 10%, rgba(40, 119, 255, .08), transparent 30%),
-                #091226;
+                radial-gradient(circle at 50% 10%, rgba(245, 158, 11, .08), transparent 30%),
+                #0b0f19;
         }
 
         .pricing-grid {
@@ -577,12 +577,12 @@
             padding: 25px 21px;
             border-radius: 9px;
             border: 1px solid var(--border);
-            background: #101a34;
+            background: #111827;
         }
 
         .price-card.popular {
-            border-color: rgba(40, 119, 255, .7);
-            box-shadow: 0 0 35px rgba(40, 119, 255, .08);
+            border-color: rgba(245, 158, 11, .7);
+            box-shadow: 0 0 35px rgba(245, 158, 11, .08);
         }
 
         .popular-badge {
@@ -592,8 +592,8 @@
             transform: translateX(-50%);
             padding: 4px 10px;
             border-radius: 20px;
-            background: var(--blue);
-            color: white;
+            background: var(--accent);
+            color: #1c1917;
             font-size: 7px;
             font-weight: 700;
             white-space: nowrap;
@@ -612,13 +612,13 @@
         }
 
         .price span {
-            color: #65738e;
+            color: #94a3b8;
             font-size: 9px;
             font-weight: 400;
         }
 
         .price-description {
-            color: #6f7d9a;
+            color: #94a3b8;
             font-size: 8px;
             min-height: 31px;
             margin-bottom: 18px;
@@ -651,15 +651,15 @@
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(255, 255, 255, .1);
-            color: #b9c4d9;
+            color: #cbd5e1;
             font-size: 9px;
             font-weight: 700;
         }
 
         .price-card.popular .price-button {
-            border-color: var(--blue);
-            background: var(--blue);
-            color: white;
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #1c1917;
         }
 
         /* =====================================================
@@ -676,10 +676,10 @@
             padding: 55px 40px;
             text-align: center;
             border-radius: 10px;
-            border: 1px solid rgba(40, 119, 255, .18);
+            border: 1px solid rgba(245, 158, 11, .18);
             background:
-                radial-gradient(circle at 50% 0%, rgba(40, 119, 255, .17), transparent 45%),
-                #0d1832;
+                radial-gradient(circle at 50% 0%, rgba(245, 158, 11, .17), transparent 45%),
+                #111827;
         }
 
         .cta-box h2 {
@@ -689,7 +689,7 @@
         }
 
         .cta-box p {
-            color: #75839f;
+            color: #94a3b8;
             font-size: 10px;
             margin-bottom: 21px;
         }
@@ -701,7 +701,7 @@
         footer {
             padding: 28px 0;
             border-top: 1px solid var(--border);
-            background: #070d1d;
+            background: #0b0f19;
         }
 
         .footer-inner {
@@ -720,7 +720,7 @@
         }
 
         .footer-copy {
-            color: #56647f;
+            color: #94a3b8;
             font-size: 8px;
         }
 
@@ -810,22 +810,22 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b0f19] text-gray-200 font-sans selection:bg-blue-600 selection:text-white">
+<body class="bg-[#0b0f19] text-gray-200 font-sans selection:bg-amber-700 selection:text-stone-950">
 
     <!-- =====================================================
          NAVBAR
     ====================================================== -->
-    <header class="border-b border-gray-800/80 bg-[#0b0f19]/80 backdrop-blur sticky top-0 z-50">
+    <header class="border-b border-gray-700/80 bg-[#0b0f19]/80 backdrop-blur sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             
             <!-- Brand Logo -->
             <a href="{{ route('home') }}" class="flex items-center space-x-2.5 group">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-600/30 group-hover:bg-blue-500 transition">
+                <div class="w-8 h-8 bg-amber-700 rounded-lg flex items-center justify-center shadow-lg shadow-amber-900/30 group-hover:bg-amber-600 transition">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
                 </div>
-                <span class="text-lg font-bold tracking-wider text-white">AMA<span class="text-blue-500">HAY</span></span>
+                <span class="text-lg font-bold tracking-wider text-white">AMA<span class="text-amber-300">HAY</span></span>
             </a>
 
             <!-- Nav Links -->
@@ -841,7 +841,7 @@
                 <a href="/login" class="text-xs font-medium text-gray-300 hover:text-white px-4 py-2 transition">
                     Login
                 </a>
-                <a href="/register" class="text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-600/30 transition">
+                <a href="/register" class="text-xs font-medium bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-xl shadow-lg shadow-amber-900/30 transition">
                     Daftar Gratis
                 </a>
             </div>
@@ -858,13 +858,13 @@
             
             <!-- Hero Copy -->
             <div class="space-y-6">
-                <div class="inline-block text-[11px] font-semibold tracking-wider text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full uppercase border border-blue-500/20">
+                <div class="inline-block text-[11px] font-semibold tracking-wider text-amber-300 bg-amber-500/10 px-3 py-1 rounded-full uppercase border border-amber-400/30">
                     Sistem Manajemen Bengkel
                 </div>
 
                 <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
                     Revolusi Digital untuk <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Manajemen Bengkel Anda</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-300">Manajemen Bengkel Anda</span>
                 </h1>
 
                 <p class="text-sm text-gray-400 leading-relaxed max-w-lg">
@@ -872,46 +872,46 @@
                 </p>
 
                 <div class="flex flex-wrap items-center gap-4 pt-2">
-                    <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-6 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition">
+                    <a href="/register" class="bg-amber-700 hover:bg-amber-800 text-white font-medium text-xs px-6 py-3 rounded-xl shadow-lg shadow-amber-900/30 transition">
                         Mulai Sekarang
                     </a>
-                    <a href="#fitur" class="bg-[#161e2e] hover:bg-gray-800 text-gray-300 border border-gray-700/80 font-medium text-xs px-6 py-3 rounded-xl transition">
+                    <a href="#fitur" class="bg-[#1f2937] hover:bg-gray-800 text-gray-300 border border-gray-700/80 font-medium text-xs px-6 py-3 rounded-xl transition">
                         Lihat Fitur
                     </a>
                 </div>
             </div>
 
             <!-- Dashboard Preview Mockup -->
-            <div class="bg-[#111827] border border-gray-800/80 rounded-3xl p-6 shadow-2xl relative">
-                <div class="flex items-center justify-between pb-4 border-b border-gray-800 text-xs mb-4">
+            <div class="bg-[#111827] border border-gray-700/80 rounded-3xl p-6 shadow-2xl relative">
+                <div class="flex items-center justify-between pb-4 border-b border-gray-700 text-xs mb-4">
                     <span class="font-bold text-white">Pratinjau Dashboard</span>
                     <span class="text-gray-500">Ilustrasi</span>
                 </div>
 
                 <!-- Chart Bars Simulation -->
-                <div class="h-32 flex items-end justify-between gap-2 px-2 bg-[#161e2e]/50 rounded-xl p-4 mb-4 border border-gray-800/50">
-                    <div class="w-full bg-blue-600/40 hover:bg-blue-600 h-[40%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/60 hover:bg-blue-600 h-[65%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/50 hover:bg-blue-600 h-[50%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/80 hover:bg-blue-600 h-[80%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/60 hover:bg-blue-600 h-[60%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/90 hover:bg-blue-600 h-[95%] rounded-t transition"></div>
-                    <div class="w-full bg-blue-600/70 hover:bg-blue-600 h-[70%] rounded-t transition"></div>
+                <div class="h-32 flex items-end justify-between gap-2 px-2 bg-[#1f2937]/50 rounded-xl p-4 mb-4 border border-gray-700/50">
+                    <div class="w-full bg-amber-400/40 hover:bg-amber-800 h-[40%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/60 hover:bg-amber-800 h-[65%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/50 hover:bg-amber-800 h-[50%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/80 hover:bg-amber-800 h-[80%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/60 hover:bg-amber-800 h-[60%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/90 hover:bg-amber-800 h-[95%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/70 hover:bg-amber-800 h-[70%] rounded-t transition"></div>
                 </div>
 
                 <!-- Mini Stats Grid -->
                 <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-[#161e2e] p-3 rounded-xl border border-gray-800">
+                    <div class="bg-[#1f2937] p-3 rounded-xl border border-gray-700">
                         <small class="block text-[10px] text-gray-400 mb-1">Kendaraan</small>
                         <strong class="text-sm font-bold text-white">—</strong>
                         <span class="block text-[10px] text-gray-400 mt-0.5">Data contoh</span>
                     </div>
-                    <div class="bg-[#161e2e] p-3 rounded-xl border border-gray-800">
+                    <div class="bg-[#1f2937] p-3 rounded-xl border border-gray-700">
                         <small class="block text-[10px] text-gray-400 mb-1">Antrean</small>
                         <strong class="text-sm font-bold text-white">—</strong>
                         <span class="block text-[10px] text-gray-400 mt-0.5">Data contoh</span>
                     </div>
-                    <div class="bg-[#161e2e] p-3 rounded-xl border border-gray-800">
+                    <div class="bg-[#1f2937] p-3 rounded-xl border border-gray-700">
                         <small class="block text-[10px] text-gray-400 mb-1">Transaksi</small>
                         <strong class="text-sm font-bold text-white">—</strong>
                         <span class="block text-[10px] text-gray-400 mt-0.5">Data contoh</span>
@@ -925,27 +925,27 @@
         <!-- =====================================================
              STATISTICS BANNER
         ====================================================== -->
-        <section class="border-y border-gray-800/80 bg-[#111827]/50 py-10">
+        <section class="border-y border-gray-700/80 bg-[#111827]/50 py-10">
             <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Total Kendaraan</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['totalVehicles'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Transaksi Selesai</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['completedTransactions'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Sparepart Terjual</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">{{ number_format($statistics['sparePartsSold'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
                 <div class="space-y-1">
                     <small class="text-xs text-gray-400">Pendapatan</small>
-                    <strong class="text-xl font-extrabold text-white block">—</strong>
-                    <p class="text-[11px] text-gray-400 font-medium">Data aktual belum tersedia</p>
+                    <strong class="text-xl font-extrabold text-white block">Rp {{ number_format($statistics['revenue'], 0, ',', '.') }}</strong>
+                    <p class="text-[11px] text-gray-400 font-medium">{{ $statistics['description'] }}</p>
                 </div>
             </div>
         </section>
@@ -958,33 +958,33 @@
             <div class="max-w-6xl mx-auto px-6">
                 
                 <div class="text-center max-w-xl mx-auto mb-16">
-                    <span class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Fitur Utama</span>
+                    <span class="text-[11px] font-semibold text-amber-300 uppercase tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-400/30">Fitur Utama</span>
                     <h2 class="text-2xl md:text-3xl font-bold text-white mt-3 mb-2">Semua yang Dibutuhkan Bengkel Anda</h2>
                     <p class="text-xs text-gray-400">Kelola berbagai aktivitas bengkel dari satu sistem yang terintegrasi.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl space-y-3">
-                        <div class="w-10 h-10 bg-blue-600/10 text-blue-400 font-bold rounded-xl flex items-center justify-center border border-blue-500/20">A</div>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 bg-amber-400/10 text-amber-300 font-bold rounded-xl flex items-center justify-center border border-amber-400/30">A</div>
                         <h3 class="text-sm font-bold text-white">Antrean Kendaraan</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Kelola antrean kendaraan dan pantau status servis dengan mudah.</p>
                     </div>
 
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl space-y-3">
-                        <div class="w-10 h-10 bg-blue-600/10 text-blue-400 font-bold rounded-xl flex items-center justify-center border border-blue-500/20">S</div>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 bg-amber-400/10 text-amber-300 font-bold rounded-xl flex items-center justify-center border border-amber-400/30">S</div>
                         <h3 class="text-sm font-bold text-white">Manajemen Sparepart</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Pantau stok sparepart, barang masuk, barang keluar, dan persediaan.</p>
                     </div>
 
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl space-y-3">
-                        <div class="w-10 h-10 bg-blue-600/10 text-blue-400 font-bold rounded-xl flex items-center justify-center border border-blue-500/20">K</div>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 bg-amber-400/10 text-amber-300 font-bold rounded-xl flex items-center justify-center border border-amber-400/30">K</div>
                         <h3 class="text-sm font-bold text-white">Kasir & Transaksi</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Proses transaksi pelanggan dengan pencatatan yang lebih teratur.</p>
                     </div>
 
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl space-y-3">
-                        <div class="w-10 h-10 bg-blue-600/10 text-blue-400 font-bold rounded-xl flex items-center justify-center border border-blue-500/20">M</div>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl space-y-3">
+                        <div class="w-10 h-10 bg-amber-400/10 text-amber-300 font-bold rounded-xl flex items-center justify-center border border-amber-400/30">M</div>
                         <h3 class="text-sm font-bold text-white">Manajemen Mekanik</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Atur mekanik dan pekerjaan servis secara lebih terstruktur.</p>
                     </div>
@@ -998,31 +998,31 @@
         <!-- =====================================================
              CARA KERJA
         ====================================================== -->
-        <section class="py-20 bg-[#111827]/30 border-y border-gray-800/80" id="cara-kerja">
+        <section class="py-20 bg-[#111827]/30 border-y border-gray-700/80" id="cara-kerja">
             <div class="max-w-6xl mx-auto px-6">
                 
                 <div class="text-center max-w-xl mx-auto mb-16">
-                    <span class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Cara Kerja</span>
+                    <span class="text-[11px] font-semibold text-amber-300 uppercase tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-400/30">Cara Kerja</span>
                     <h2 class="text-2xl md:text-3xl font-bold text-white mt-3 mb-2">Sederhana untuk Digunakan</h2>
                     <p class="text-xs text-gray-400">Semua aktivitas operasional bengkel dikelola melalui beberapa langkah sederhana.</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl relative space-y-3">
-                        <span class="text-3xl font-black text-blue-500/20 block">01</span>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl relative space-y-3">
+                        <span class="text-3xl font-black text-amber-300/35 block">01</span>
                         <h3 class="text-sm font-bold text-white">Catat Kendaraan</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Masukkan data pelanggan dan kendaraan yang datang ke bengkel.</p>
                     </div>
 
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl relative space-y-3">
-                        <span class="text-3xl font-black text-blue-500/20 block">02</span>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl relative space-y-3">
+                        <span class="text-3xl font-black text-amber-300/35 block">02</span>
                         <h3 class="text-sm font-bold text-white">Proses Servis</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Mekanik mengerjakan servis dan seluruh proses dapat dipantau.</p>
                     </div>
 
-                    <div class="bg-[#111827] border border-gray-800/80 p-6 rounded-2xl relative space-y-3">
-                        <span class="text-3xl font-black text-blue-500/20 block">03</span>
+                    <div class="bg-[#111827] border border-gray-700/80 p-6 rounded-2xl relative space-y-3">
+                        <span class="text-3xl font-black text-amber-300/35 block">03</span>
                         <h3 class="text-sm font-bold text-white">Selesaikan Transaksi</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Kasir mencatat transaksi dan pelanggan dapat menyelesaikan pembayaran.</p>
                     </div>
@@ -1040,7 +1040,7 @@
             <div class="max-w-6xl mx-auto px-6">
                 
                 <div class="text-center max-w-xl mx-auto mb-16">
-                    <span class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Pilihan Paket</span>
+                    <span class="text-[11px] font-semibold text-amber-300 uppercase tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-400/30">Pilihan Paket</span>
                     <h2 class="text-2xl md:text-3xl font-bold text-white mt-3 mb-2">Paket yang Sesuai untuk Bengkel Anda</h2>
                     <p class="text-xs text-gray-400">Pilih paket sesuai kebutuhan operasional bengkel Anda.</p>
                 </div>
@@ -1048,33 +1048,33 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                     
                     <!-- Basic -->
-                    <div class="bg-[#111827] border border-gray-800/80 p-8 rounded-3xl flex flex-col justify-between">
+                    <div class="bg-[#111827] border border-gray-700/80 p-8 rounded-3xl flex flex-col justify-between">
                         <div class="space-y-4">
                             <div class="text-sm font-bold text-white">Basic</div>
                             <div class="text-3xl font-black text-white">Rp 99rb <span class="text-xs font-normal text-gray-400">/bulan</span></div>
                             <p class="text-xs text-gray-400">Untuk bengkel kecil yang baru memulai digitalisasi.</p>
-                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-700">
                                 <li>✓ Manajemen kendaraan</li>
                                 <li>✓ Manajemen antrean</li>
                                 <li>✓ Manajemen sparepart</li>
                                 <li>✓ Laporan dasar</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
+                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-800 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
                             Pilih Paket
                         </a>
                     </div>
 
                     <!-- Professional (Popular) -->
-                    <div class="bg-[#111827] border-2 border-blue-600 p-8 rounded-3xl flex flex-col justify-between relative shadow-xl shadow-blue-600/10">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <div class="bg-[#111827] border-2 border-amber-400 p-8 rounded-3xl flex flex-col justify-between relative shadow-xl shadow-amber-900/20">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-700 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                             Paling Populer
                         </div>
                         <div class="space-y-4 pt-2">
                             <div class="text-sm font-bold text-white">Professional</div>
                             <div class="text-3xl font-black text-white">Rp 249rb <span class="text-xs font-normal text-gray-400">/bulan</span></div>
                             <p class="text-xs text-gray-400">Untuk bengkel yang membutuhkan pengelolaan lebih lengkap.</p>
-                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-700">
                                 <li>✓ Semua fitur Basic</li>
                                 <li>✓ Kasir & transaksi</li>
                                 <li>✓ Manajemen mekanik</li>
@@ -1082,25 +1082,25 @@
                                 <li>✓ Pengingat servis</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl text-xs transition shadow-lg shadow-blue-600/30">
+                        <a href="/register" class="mt-8 block text-center bg-amber-700 hover:bg-amber-800 text-white font-medium py-3 rounded-xl text-xs transition shadow-lg shadow-amber-900/30">
                             Pilih Paket
                         </a>
                     </div>
 
                     <!-- Business -->
-                    <div class="bg-[#111827] border border-gray-800/80 p-8 rounded-3xl flex flex-col justify-between">
+                    <div class="bg-[#111827] border border-gray-700/80 p-8 rounded-3xl flex flex-col justify-between">
                         <div class="space-y-4">
                             <div class="text-sm font-bold text-white">Business</div>
                             <div class="text-3xl font-black text-white">Rp 499rb <span class="text-xs font-normal text-gray-400">/bulan</span></div>
                             <p class="text-xs text-gray-400">Untuk bengkel dengan kebutuhan operasional yang lebih besar.</p>
-                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-800">
+                            <ul class="space-y-2 text-xs text-gray-300 pt-4 border-t border-gray-700">
                                 <li>✓ Semua fitur Professional</li>
                                 <li>✓ Multi pengguna</li>
                                 <li>✓ Analitik lanjutan</li>
                                 <li>✓ Laporan bisnis</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
+                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-800 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
                             Pilih Paket
                         </a>
                     </div>
@@ -1115,11 +1115,11 @@
              CTA SECTION
         ====================================================== -->
         <section class="max-w-6xl mx-auto px-6 pb-20">
-            <div class="bg-gradient-to-r from-blue-900/40 via-[#111827] to-indigo-950/40 border border-blue-500/20 p-10 md:p-14 rounded-3xl text-center space-y-4 shadow-2xl">
+            <div class="bg-gradient-to-r from-amber-900/40 via-[#111827] to-amber-900/40 border border-amber-400/30 p-10 md:p-14 rounded-3xl text-center space-y-4 shadow-2xl">
                 <h2 class="text-xl md:text-2xl font-bold text-white">Siap Mengelola Bengkel Lebih Mudah?</h2>
                 <p class="text-xs text-gray-400 max-w-md mx-auto">Mulai gunakan AMAHAY untuk membantu mengelola operasional bengkel Anda.</p>
                 <div class="pt-2">
-                    <a href="/register" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-8 py-3 rounded-xl shadow-lg shadow-blue-600/30 transition">
+                    <a href="/register" class="inline-block bg-amber-700 hover:bg-amber-800 text-white font-medium text-xs px-8 py-3 rounded-xl shadow-lg shadow-amber-900/30 transition">
                         Mulai Sekarang
                     </a>
                 </div>
@@ -1131,7 +1131,7 @@
     <!-- =====================================================
          FOOTER
     ====================================================== -->
-    <footer class="border-t border-gray-800/80 py-6 px-6">
+    <footer class="border-t border-gray-700/80 py-6 px-6">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-3">
             <div>
                 © 2026 <strong>AMAHAY</strong> — Sistem Manajemen Bengkel

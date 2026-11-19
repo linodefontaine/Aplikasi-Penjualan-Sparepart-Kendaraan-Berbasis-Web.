@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class OwnerOperationsControllerTest extends TestCase
@@ -176,12 +174,18 @@ class OwnerOperationsControllerTest extends TestCase
                 'sku' => 'part-001',
                 'name' => 'Kampas Rem',
                 'stock' => 5,
+                'purchase_price' => 50000,
                 'price' => 85000,
                 'category' => 'Rem',
                 'unit' => 'set',
                 'minimum_stock' => 2,
                 'location' => 'Rak A1',
             ])->assertRedirect(route('owner.stok'));
+
+            $this->get(route('owner.stok'))
+                ->assertOk()
+                ->assertSee('Rp 50.000')
+                ->assertSee('Rp 85.000');
 
             $partId = $tenant->run(fn (): int => (int) DB::table('spare_parts')
                 ->where('sku', 'PART-001')
@@ -197,6 +201,7 @@ class OwnerOperationsControllerTest extends TestCase
                     'id' => $partId,
                     'sku' => 'PART-001',
                     'stock' => 3,
+                    'purchase_price' => 50000,
                 ]);
                 $this->assertDatabaseHas('inventory_movements', [
                     'spare_part_id' => $partId,
@@ -214,138 +219,6 @@ class OwnerOperationsControllerTest extends TestCase
                     'notes' => 'Terjual langsung',
                 ]);
             });
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
-    public function test_owner_can_upload_replace_and_publish_a_product_image_per_tenant(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Foto Produk',
-            'subdomain' => 'bengkel-foto-produk',
-            'package' => 'starter',
-        ], 'Pemilik Foto Produk', '081298765440');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-
-        try {
-            $this->post(route('owner.stok.store'), [
-                'sku' => 'PHOTO-PART-001',
-                'name' => 'Kampas Rem Bergambar',
-                'stock' => 3,
-                'price' => 75000,
-                'unit' => 'set',
-                'minimum_stock' => 1,
-                'image' => UploadedFile::fake()->image('kampas-rem.png'),
-            ])->assertRedirect(route('owner.stok'))
-                ->assertSessionHas('success', 'Sparepart berhasil ditambahkan.');
-
-            $part = $tenant->run(fn (): object => DB::table('spare_parts')
-                ->where('sku', 'PHOTO-PART-001')
-                ->first());
-            $firstImagePath = $part->image_path;
-
-            $this->assertStringStartsWith(
-                'tenants/'.$tenant->getTenantKey().'/spare-parts/',
-                $firstImagePath,
-            );
-            Storage::disk('public')->assertExists($firstImagePath);
-
-            $this->patch(route('owner.stok.image', $part->id), [
-                'image' => UploadedFile::fake()->image('kampas-rem-baru.png'),
-            ])->assertRedirect(route('owner.stok'))
-                ->assertSessionHas('success', 'Foto sparepart berhasil diperbarui.');
-
-            $updatedImagePath = $tenant->run(fn (): string => (string) DB::table('spare_parts')
-                ->where('id', $part->id)
-                ->value('image_path'));
-            $this->assertNotSame($firstImagePath, $updatedImagePath);
-            Storage::disk('public')->assertMissing($firstImagePath);
-            Storage::disk('public')->assertExists($updatedImagePath);
-
-            $this->get(route('owner.stok'))
-                ->assertOk()
-                ->assertSee('/storage/'.$updatedImagePath)
-                ->assertSee('Ubah foto');
-
-            $customer = User::factory()->create(['role' => 'Pelanggan']);
-            $this->actingAs($customer)
-                ->get(route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]))
-                ->assertOk()
-                ->assertSee('Kampas Rem Bergambar')
-                ->assertSee('/storage/'.$updatedImagePath)
-                ->assertSee('Foto Kampas Rem Bergambar');
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
-    public function test_sparepart_image_upload_rejects_non_images_without_saving_a_product(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Validasi Foto',
-            'subdomain' => 'bengkel-validasi-foto',
-            'package' => 'starter',
-        ], 'Pemilik Validasi Foto', '081298765441');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-
-        try {
-            $this->post(route('owner.stok.store'), [
-                'sku' => 'PHOTO-PART-INVALID',
-                'name' => 'Produk Tanpa Foto',
-                'stock' => 1,
-                'price' => 10000,
-                'unit' => 'pcs',
-                'minimum_stock' => 0,
-                'image' => UploadedFile::fake()->create('dokumen.pdf', 100, 'application/pdf'),
-            ])->assertSessionHasErrors('image');
-
-            $tenant->run(function (): void {
-                $this->assertDatabaseCount('spare_parts', 0);
-            });
-            Storage::disk('public')->assertEmpty();
-        } finally {
-            tenancy()->end();
-            DB::purge('tenant');
-            $tenant->delete();
-        }
-    }
-
-    public function test_only_the_owner_can_upload_product_images_and_missing_parts_leave_no_file(): void
-    {
-        $tenant = $this->createTenantForMainAccount([
-            'tenant_name' => 'Bengkel Otorisasi Foto',
-            'subdomain' => 'bengkel-otorisasi-foto',
-            'package' => 'starter',
-        ], 'Pemilik Otorisasi Foto', '081298765442');
-        config(['tenancy.filesystem.disks' => ['local']]);
-        Storage::fake('public');
-        $owner = auth()->user();
-        $cashier = User::factory()->create([
-            'role' => 'Kasir',
-            'tenant_id' => $tenant->getTenantKey(),
-        ]);
-
-        try {
-            $this->actingAs($cashier)
-                ->patch(route('owner.stok.image', 999999), [
-                    'image' => UploadedFile::fake()->image('foto.png'),
-                ])
-                ->assertForbidden();
-            Storage::disk('public')->assertEmpty();
-
-            $this->actingAs($owner)
-                ->patch(route('owner.stok.image', 999999), [
-                    'image' => UploadedFile::fake()->image('foto.png'),
-                ])
-                ->assertNotFound();
-            Storage::disk('public')->assertEmpty();
         } finally {
             tenancy()->end();
             DB::purge('tenant');
@@ -528,6 +401,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '6f8d7e55-7d88-4ee2-8b78-8ff3b9fcce01',
                     'customer_id' => $catalog['customerId'],
                     'payment_method' => 'cash',
                     'amount_paid' => 250000,
@@ -599,6 +473,7 @@ class OwnerOperationsControllerTest extends TestCase
 
             $this->actingAs($cashier)
                 ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => '7268820c-79c3-4fdb-bf66-45a1e448d415',
                     'payment_method' => 'cash',
                     'amount_paid' => 50000,
                     'parts' => [$partId],
@@ -683,6 +558,141 @@ class OwnerOperationsControllerTest extends TestCase
         }
     }
 
+    public function test_starter_tenant_cannot_add_a_third_active_mechanic(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Starter',
+            'subdomain' => 'bengkel-paket-starter',
+            'package' => 'starter',
+        ], 'Pemilik Starter', '081298765418');
+
+        try {
+            $tenant->run(function (): void {
+                DB::table('employees')->insert([
+                    [
+                        'name' => 'Mekanik Starter 1',
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    [
+                        'name' => 'Mekanik Starter 2',
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                ]);
+            });
+
+            $this->from(route('owner.mekanik'))
+                ->post(route('owner.mekanik.store'), [
+                    'name' => 'Mekanik Starter 3',
+                    'position' => 'Mekanik',
+                ])
+                ->assertRedirectBackWithErrors([
+                    'name' => 'Paket Starter membatasi maksimal 2 karyawan/mekanik aktif.',
+                ]);
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseCount('employees', 2);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_pro_tenant_cannot_add_an_eleventh_active_mechanic(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Pro',
+            'subdomain' => 'bengkel-paket-pro',
+            'package' => 'pro',
+        ], 'Pemilik Pro', '081298765419');
+
+        try {
+            $tenant->run(function (): void {
+                $employees = [];
+
+                for ($index = 1; $index <= 10; $index++) {
+                    $employees[] = [
+                        'name' => 'Mekanik Pro '.$index,
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                DB::table('employees')->insert($employees);
+            });
+
+            $this->from(route('owner.mekanik'))
+                ->post(route('owner.mekanik.store'), [
+                    'name' => 'Mekanik Pro 11',
+                    'position' => 'Mekanik',
+                ])
+                ->assertRedirectBackWithErrors([
+                    'name' => 'Paket Pro membatasi maksimal 10 karyawan/mekanik aktif.',
+                ]);
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseCount('employees', 10);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_enterprise_tenant_can_add_more_than_ten_active_mechanics(): void
+    {
+        $tenant = $this->createTenantForMainAccount([
+            'tenant_name' => 'Bengkel Paket Enterprise',
+            'subdomain' => 'bengkel-paket-enterprise',
+            'package' => 'enterprise',
+        ], 'Pemilik Enterprise', '081298765420');
+
+        try {
+            $tenant->run(function (): void {
+                $employees = [];
+
+                for ($index = 1; $index <= 10; $index++) {
+                    $employees[] = [
+                        'name' => 'Mekanik Enterprise '.$index,
+                        'position' => 'Mekanik',
+                        'status' => 'active',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                DB::table('employees')->insert($employees);
+            });
+
+            $this->post(route('owner.mekanik.store'), [
+                'name' => 'Mekanik Enterprise 11',
+                'position' => 'Mekanik',
+            ])->assertRedirect(route('owner.mekanik'));
+
+            $tenant->run(function (): void {
+                $this->assertDatabaseHas('employees', [
+                    'name' => 'Mekanik Enterprise 11',
+                    'status' => 'active',
+                ]);
+                $this->assertDatabaseCount('employees', 11);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
     public function test_reminder_rejects_a_vehicle_belonging_to_a_different_customer(): void
     {
         $tenant = $this->createTenantForMainAccount([
@@ -743,8 +753,12 @@ class OwnerOperationsControllerTest extends TestCase
             'password_confirmation' => 'password123',
         ])->assertRedirect(route('user.menu'));
 
-        $this->post(route('tenant.store'), $tenant)
-            ->assertRedirect(route('owner.home'));
+        $registrationResponse = $this->post(route('tenant.store'), $tenant);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
+        ])->assertRedirect(route('owner.home'));
 
         return Tenant::query()->findOrFail(auth()->user()->tenant_id);
     }

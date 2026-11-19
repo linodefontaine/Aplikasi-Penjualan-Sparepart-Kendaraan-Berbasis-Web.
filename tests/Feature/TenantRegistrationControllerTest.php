@@ -6,12 +6,22 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Stancl\Tenancy\Events\TenantCreated;
 use Tests\TestCase;
 
 class TenantRegistrationControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    public static function packagePrices(): array
+    {
+        return [
+            'starter' => ['starter', 149000],
+            'pro' => ['pro', 249000],
+            'enterprise' => ['enterprise', 499000],
+        ];
+    }
 
     public function test_main_account_registration_does_not_create_a_tenant(): void
     {
@@ -49,23 +59,56 @@ class TenantRegistrationControllerTest extends TestCase
         $this->get(route('tenant.create'))
             ->assertOk()
             ->assertSee('Daftarkan Tenant Bengkel')
-            ->assertSee('Pemilik Akun');
-        $this->post(route('tenant.store'), [
+            ->assertSee('Pemilik Akun')
+            ->assertSeeInOrder([
+                'Starter Tenant — Rp 149rb / bln',
+                'Pro Tenant — Rp 249rb / bln',
+                'Enterprise — Rp 499rb / bln',
+            ])
+            ->assertSee('Paket dibayar per bulan dan aktif setelah pembayaran dikonfirmasi.')
+            ->assertSee('Maksimal 2 karyawan/mekanik aktif.')
+            ->assertSee('Maksimal 10 karyawan/mekanik aktif.')
+            ->assertSee('Karyawan/mekanik aktif tanpa batas.');
+        $registrationResponse = $this->post(route('tenant.store'), [
             'tenant_name' => 'Bengkel Utama',
             'subdomain' => 'bengkel-utama',
             'package' => 'starter',
-        ])->assertRedirect(route('owner.home'));
+        ]);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->get(route('tenant.checkout.show', ['invoice' => $invoice]))
+            ->assertOk()
+            ->assertSee('Bengkel Utama')
+            ->assertSee('Starter Tenant')
+            ->assertSee('Rp 149.000')
+            ->assertSee($invoice)
+            ->assertSee('QRIS')
+            ->assertSee('Virtual Account');
 
         $tenant = Tenant::query()->firstOrFail();
+        $this->assertSame('starter', $tenant->getAttribute('package'));
+        $this->assertSame('pending_payment', $tenant->getAttribute('status'));
         $this->assertDatabaseHas('users', [
             'id' => $customer->id,
             'role' => 'Owner',
             'tenant_id' => $tenant->getTenantKey(),
         ]);
         $this->assertDatabaseHas('domains', [
-            'domain' => 'bengkel-utama.autozone.pro',
+            'domain' => 'bengkel-utama.yuma.yume.tech',
             'tenant_id' => $tenant->getTenantKey(),
         ]);
+        $this->get(route('tenant.create'))
+            ->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
+        ])->assertRedirect(route('owner.home'));
+        $this->assertDatabaseHas('subscription_invoices', [
+            'invoice_number' => $invoice,
+            'payment_method' => 'qris',
+            'status' => 'paid',
+            'amount' => 149000,
+        ]);
+        $this->assertTrue($tenant->fresh()->isActive());
         $this->assertAuthenticatedAs($customer->fresh());
         $this->get(route('tenant.create'))->assertRedirect(route('owner.home'));
         $this->post(route('tenant.store'), [
@@ -94,6 +137,48 @@ class TenantRegistrationControllerTest extends TestCase
         ])->assertRedirect(route('login'));
 
         $this->assertDatabaseCount('tenants', 0);
+    }
+
+    public function test_tenant_domain_uses_the_current_host_when_no_base_domain_is_configured(): void
+    {
+        config(['tenancy.base_domain' => null]);
+        Event::fake([TenantCreated::class]);
+        $customer = User::factory()->create(['role' => 'Pelanggan']);
+
+        $response = $this->actingAs($customer)->post(route('tenant.store'), [
+            'tenant_name' => 'Bengkel Host',
+            'subdomain' => 'bengkel-host',
+            'package' => 'starter',
+        ]);
+        $invoice = basename((string) parse_url($response->headers->get('Location'), PHP_URL_PATH));
+
+        $response->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->assertDatabaseHas('domains', [
+            'domain' => 'bengkel-host.yuma.yume.tech',
+            'tenant_id' => $customer->fresh()->tenant_id,
+        ]);
+    }
+
+    #[DataProvider('packagePrices')]
+    public function test_registration_creates_an_invoice_for_the_selected_package(string $package, int $amount): void
+    {
+        Event::fake([TenantCreated::class]);
+        $customer = User::factory()->create(['role' => 'Pelanggan']);
+
+        $response = $this->actingAs($customer)->post(route('tenant.store'), [
+            'tenant_name' => 'Bengkel Paket '.ucfirst($package),
+            'subdomain' => 'bengkel-'.$package,
+            'package' => $package,
+        ]);
+        $invoice = basename((string) parse_url($response->headers->get('Location'), PHP_URL_PATH));
+
+        $response->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->assertDatabaseHas('subscription_invoices', [
+            'invoice_number' => $invoice,
+            'package' => $package,
+            'amount' => $amount,
+            'status' => 'pending',
+        ]);
     }
 
     public function test_existing_tenant_owner_is_redirected_to_the_dashboard_instead_of_creating_another_tenant(): void
@@ -132,7 +217,7 @@ class TenantRegistrationControllerTest extends TestCase
             'tenant_name' => 'Tenant Awal',
             'package' => 'starter',
         ]);
-        $existingTenant->createDomain('bengkel-terpakai.autozone.pro');
+        $existingTenant->createDomain('bengkel-terpakai.yuma.yume.tech');
         $customer = User::factory()->create(['role' => 'Pelanggan']);
 
         $this->actingAs($customer)

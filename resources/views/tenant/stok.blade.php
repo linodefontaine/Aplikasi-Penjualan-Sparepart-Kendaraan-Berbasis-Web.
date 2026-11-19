@@ -83,27 +83,26 @@
                         <summary class="list-none cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">
                             + Tambah Barang Baru
                         </summary>
-                        <form method="POST" action="{{ route('owner.stok.store') }}" enctype="multipart/form-data" class="absolute right-0 z-30 mt-2 grid w-80 max-w-[90vw] gap-3 rounded-xl border border-gray-700 bg-[#111827] p-4 shadow-xl">
+                        <form method="POST" action="{{ route('owner.stok.store') }}" class="absolute right-0 z-30 mt-2 grid w-80 max-w-[90vw] gap-3 rounded-xl border border-gray-700 bg-[#111827] p-4 shadow-xl">
                             @csrf
                             <h2 class="text-xs font-bold text-white">Tambah sparepart</h2>
                             <input name="sku" value="{{ old('sku') }}" required maxlength="255" placeholder="Kode SKU" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             <input name="name" value="{{ old('name') }}" required maxlength="255" placeholder="Nama sparepart" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             <div class="grid grid-cols-2 gap-2">
                                 <input name="stock" type="number" value="{{ old('stock', 0) }}" min="0" required placeholder="Stok awal" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
-                                <input name="price" type="number" value="{{ old('price') }}" min="0" step="0.01" required placeholder="Harga" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                                <input name="purchase_price" type="number" value="{{ old('purchase_price') }}" min="0" step="0.01" placeholder="Harga beli" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
+                                <input name="price" type="number" value="{{ old('price') }}" min="0" step="0.01" required placeholder="Harga jual" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                 <input name="category" value="{{ old('category') }}" maxlength="255" placeholder="Kategori" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
-                                <input name="unit" value="{{ old('unit', 'pcs') }}" maxlength="50" required placeholder="Satuan" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
                             <div class="grid grid-cols-2 gap-2">
+                                <input name="unit" value="{{ old('unit', 'pcs') }}" maxlength="50" required placeholder="Satuan" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                                 <input name="minimum_stock" type="number" value="{{ old('minimum_stock', 0) }}" min="0" required placeholder="Batas stok minimum" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                            </div>
+                            <div>
                                 <input name="location" value="{{ old('location') }}" maxlength="255" placeholder="Lokasi rak" class="rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             </div>
-                            <label class="grid gap-1.5 text-[10px] text-gray-400">
-                                <span>Foto produk (JPG, PNG, atau WebP, maks. 5 MB)</span>
-                                <input name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="min-w-0 rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-[10px] text-white file:mr-2 file:rounded-md file:border-0 file:bg-blue-600 file:px-2 file:py-1 file:text-white">
-                            </label>
                             @if ($errors->any())
                                 <p class="text-xs text-red-400">{{ $errors->first() }}</p>
                             @endif
@@ -128,9 +127,6 @@
         <div class="min-w-0 p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
             @if (session('success'))
                 <p role="status" class="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">{{ session('success') }}</p>
-            @endif
-            @if ($errors->any())
-                <p role="alert" class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">{{ $errors->first() }}</p>
             @endif
             
             <!-- 4 Kartu Ringkasan Metrik Atas -->
@@ -176,11 +172,11 @@
                     <table class="w-full text-left text-xs text-gray-300">
                         <thead class="bg-[#161e2e] text-gray-400 uppercase text-[10px] tracking-wider border-b border-gray-800">
                             <tr>
-                                <th class="px-4 py-3">Foto</th>
                                 <th class="px-4 py-3 rounded-l-lg">No. SKU</th>
                                 <th class="px-4 py-3">Nama Suku Cadang</th>
                                 <th class="px-4 py-3">Kategori</th>
                                 <th class="px-4 py-3">Rak / Lokasi</th>
+                                <th class="px-4 py-3">Harga Beli</th>
                                 <th class="px-4 py-3">Harga Jual</th>
                                 <th class="px-4 py-3">Sisa Stok</th>
                                 <th class="px-4 py-3">Status</th>
@@ -194,31 +190,11 @@
                                     $lowStock = !$outOfStock && $part->stock <= $part->minimum_stock;
                                 @endphp
                                 <tr class="hover:bg-[#161e2e]/50 transition">
-                                    <td class="min-w-36 px-4 py-3">
-                                        @if ($part->imageUrl)
-                                            <img src="{{ $part->imageUrl }}" alt="Foto {{ $part->name }}" loading="lazy" class="h-16 w-20 rounded-lg border border-gray-700 bg-[#0b0f19] object-cover">
-                                        @else
-                                            <div class="flex h-16 w-20 items-center justify-center rounded-lg border border-dashed border-gray-700 bg-[#161e2e] text-[10px] text-gray-500">Belum ada foto</div>
-                                        @endif
-                                        @if (auth()->user()->role === 'Owner')
-                                            <details class="relative mt-2 text-left">
-                                                <summary class="w-fit cursor-pointer rounded-lg border border-gray-700 px-2 py-1 text-[10px] text-gray-300 hover:bg-gray-700">{{ $part->imageUrl ? 'Ubah foto' : 'Tambah foto' }}</summary>
-                                                <form method="POST" action="{{ route('owner.stok.image', $part->id) }}" enctype="multipart/form-data" class="absolute left-0 z-20 mt-2 grid w-64 max-w-[80vw] gap-2 rounded-xl border border-gray-700 bg-[#111827] p-3 shadow-xl">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <label class="grid gap-1.5 text-[10px] text-gray-400">
-                                                        <span>Foto produk (JPG, PNG, atau WebP, maks. 5 MB)</span>
-                                                        <input name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required class="min-w-0 rounded-lg border border-gray-700 bg-[#1f2937] px-2 py-2 text-[10px] text-white file:mr-2 file:rounded-md file:border-0 file:bg-blue-600 file:px-2 file:py-1 file:text-white">
-                                                    </label>
-                                                    <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">Simpan foto</button>
-                                                </form>
-                                            </details>
-                                        @endif
-                                    </td>
                                     <td class="px-4 py-3 font-mono font-bold text-blue-400">{{ $part->sku }}</td>
                                     <td class="px-4 py-3 font-bold text-white">{{ $part->name }}</td>
                                     <td class="px-4 py-3 text-gray-400">{{ $part->category ?: '-' }}</td>
                                     <td class="px-4 py-3">{{ $part->location ?: '-' }}</td>
+                                    <td class="px-4 py-3 font-mono">Rp {{ number_format($part->purchase_price, 0, ',', '.') }}</td>
                                     <td class="px-4 py-3 font-mono">Rp {{ number_format($part->price, 0, ',', '.') }}</td>
                                     <td class="px-4 py-3 font-bold {{ $outOfStock ? 'text-red-400' : ($lowStock ? 'text-yellow-400' : 'text-white') }}">{{ number_format($part->stock, 0, ',', '.') }} {{ $part->unit }}</td>
                                     <td class="px-4 py-3">

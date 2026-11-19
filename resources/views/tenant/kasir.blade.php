@@ -47,6 +47,12 @@
                     <span>👥</span>
                     <span>Pelanggan & Mekanik</span>
                 </a>
+                @if (auth()->user()->role === 'Owner')
+                    <a href="{{ route('owner.settings') }}" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
+                        <span>🛍️</span>
+                        <span>Katalog & Pesanan</span>
+                    </a>
+                @endif
                 <a href="/owner/pengingat" class="flex items-center space-x-3 px-4 py-2.5 text-gray-400 hover:bg-[#1f2937] hover:text-white rounded-xl transition">
                     <span>🔔</span>
                     <span>Pengingat Service</span>
@@ -82,74 +88,25 @@
             <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
             <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
             <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
+            @if (auth()->user()->role === 'Owner')
+                <a href="{{ route('owner.settings') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.settings') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Katalog & Pesanan</a>
+            @endif
             <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
             <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
-            @if (auth()->user()->role === 'Owner')
-                <a href="{{ route('owner.settings') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.settings') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengaturan Pesanan</a>
-            @endif
             <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Akun Utama</a>
         </nav>
-
-        <div class="space-y-3 px-4 pt-5 sm:px-6 lg:px-8">
-            @if (session('success'))
-                <p role="status" class="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">{{ session('success') }}</p>
-            @endif
-            @if ($errors->any())
-                <p role="alert" class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">{{ $errors->first() }}</p>
-            @endif
-        </div>
-
-        <section class="space-y-4 px-4 pt-5 sm:px-6 lg:px-8">
-            <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h2 class="text-sm font-bold text-white">Pesanan Katalog Menunggu Pembayaran</h2>
-                    <p class="mt-1 text-[11px] text-gray-400">Konfirmasi hanya setelah pembayaran diterima. Stok fisik akan dikurangi saat dikonfirmasi.</p>
-                </div>
-                <span class="text-[10px] text-gray-500">{{ $pendingOrders->count() }} pesanan ditampilkan</span>
-            </div>
-            <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                @forelse ($pendingOrders as $order)
-                    <article class="space-y-4 rounded-2xl border border-yellow-500/20 bg-[#111827] p-4 shadow-lg sm:p-5">
-                        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                                <p class="font-mono text-xs font-bold text-blue-400">{{ $order->invoice_number }}</p>
-                                <p class="mt-1 text-xs font-semibold text-white">{{ $order->customer_name }}{{ $order->customer_phone ? ' · '.$order->customer_phone : '' }}</p>
-                            </div>
-                            <span class="w-fit rounded-full bg-yellow-500/10 px-2.5 py-1 text-[10px] text-yellow-300">Menunggu pembayaran</span>
-                        </div>
-                        <div class="grid gap-3 text-[11px] text-gray-400 sm:grid-cols-2">
-                            <p>Pembayaran: <span class="text-gray-200">{{ ['cash' => 'Tunai saat ambil', 'bank_transfer' => 'Transfer bank', 'qris' => 'QRIS manual', 'e_wallet' => 'E-wallet'][$order->payment_method] ?? $order->payment_method }}</span></p>
-                            <p>Pemenuhan: <span class="text-gray-200">{{ ['pickup' => 'Ambil di bengkel', 'delivery' => 'Diantar bengkel', 'shipping' => 'Dikirim paket'][$order->fulfillment_method] ?? $order->fulfillment_method }}</span></p>
-                            @if ($order->delivery_address)
-                                <p class="whitespace-pre-line sm:col-span-2">Alamat penerima: <span class="text-gray-200">{{ $order->delivery_address }}</span></p>
-                            @endif
-                        </div>
-                        <ul class="space-y-1 border-y border-gray-800 py-3 text-[11px] text-gray-300">
-                            @foreach ($pendingOrderItems[$order->id] ?? collect() as $item)
-                                <li class="flex justify-between gap-3">
-                                    <span>{{ $item->item_name }} × {{ number_format($item->quantity, 0, ',', '.') }}</span>
-                                    <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p class="text-sm font-bold text-white">Total: Rp {{ number_format($order->total, 0, ',', '.') }}</p>
-                            <form method="POST" action="{{ route('owner.kasir.pesanan.confirm', ['sale' => $order->id]) }}" onsubmit="return confirm('Konfirmasi bahwa pembayaran pesanan ini sudah diterima?')">
-                                @csrf
-                                <button type="submit" class="w-full rounded-xl bg-green-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-green-700 sm:w-auto">Konfirmasi Pembayaran</button>
-                            </form>
-                        </div>
-                    </article>
-                @empty
-                    <p class="rounded-xl border border-dashed border-gray-700 bg-[#111827] px-4 py-6 text-center text-xs text-gray-400 xl:col-span-2">Belum ada pesanan katalog yang menunggu konfirmasi.</p>
-                @endforelse
-            </div>
-        </section>
 
         <!-- Area Transaksi Layout 2 Kolom -->
         <form method="POST" action="{{ route('owner.kasir.checkout') }}" class="min-w-0 p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
             @csrf
+            <input type="hidden" name="checkout_idempotency_key" value="{{ old('checkout_idempotency_key', $checkoutIdempotencyKey) }}">
             <div class="lg:col-span-2 space-y-5">
+                @if (session('success'))
+                    <p role="status" class="rounded-xl border border-green-500/30 bg-green-500/10 px-4 py-3 text-xs text-green-300">{{ session('success') }}</p>
+                @endif
+                @if ($errors->any())
+                    <p role="alert" class="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">{{ $errors->first() }}</p>
+                @endif
                 <section class="bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-white mb-4">Katalog Sparepart</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -211,17 +168,26 @@
                     </label>
                     <label class="block space-y-1 text-[10px] text-gray-400">
                         <span>Metode pembayaran</span>
-                        <select name="payment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                        <select id="payment-method" name="payment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
                             <option value="cash" @selected(old('payment_method', 'cash') === 'cash')>Tunai</option>
-                            <option value="transfer" @selected(old('payment_method') === 'transfer')>Transfer (dicatat manual)</option>
-                            <option value="qris" @selected(old('payment_method') === 'qris')>QRIS (dicatat manual)</option>
+                            <option value="transfer" @selected(old('payment_method') === 'transfer')>Transfer bank (konfirmasi kasir)</option>
+                            <option value="qris" @selected(old('payment_method') === 'qris')>QRIS Sandbox</option>
                         </select>
                     </label>
-                    <label class="block space-y-1 text-[10px] text-gray-400">
-                        <span>Jumlah diterima</span>
-                        <input type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid') }}" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                    <label id="bank-code-field" hidden class="space-y-1 text-[10px] text-gray-400">
+                        <span>Bank pengirim</span>
+                        <select id="bank-code" name="bank_code" disabled class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                            <option value="">Pilih bank</option>
+                            @foreach (config('services.bank_transfer.banks') as $bankCode => $bankName)
+                                <option value="{{ $bankCode }}" @selected(old('bank_code') === $bankCode)>{{ $bankName }}</option>
+                            @endforeach
+                        </select>
                     </label>
-                    <p class="text-[10px] text-gray-500">Total dihitung ulang dari harga katalog dan stok saat transaksi disimpan.</p>
+                    <label id="amount-paid-field" class="block space-y-1 text-[10px] text-gray-400">
+                        <span>Jumlah diterima</span>
+                        <input id="amount-paid" type="number" name="amount_paid" min="0" step="0.01" value="{{ old('amount_paid') }}" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white">
+                    </label>
+                    <p id="payment-help" class="text-[10px] text-gray-500">Total dihitung ulang dari harga katalog dan stok saat transaksi disimpan.</p>
                     <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700">Simpan & Catat Pembayaran</button>
                 </section>
 
@@ -245,7 +211,90 @@
                 </section>
             </div>
         </form>
+
+        <section class="space-y-4 border-t border-gray-800 p-4 sm:p-6 lg:p-8">
+            <div>
+                <h2 class="text-sm font-bold text-white">Pesanan Katalog Konsumen</h2>
+                <p class="mt-1 text-xs text-gray-400">Konfirmasi pembayaran setelah diterima. Stok akan berkurang setelah konfirmasi.</p>
+            </div>
+            <div class="grid gap-4 xl:grid-cols-2">
+                @forelse ($pendingOrders as $order)
+                    <article class="space-y-4 rounded-2xl border border-gray-800 bg-[#111827] p-5 shadow-lg">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <p class="font-mono text-xs font-bold text-blue-400">{{ $order->invoice_number }}</p>
+                                <p class="mt-1 text-xs font-semibold text-white">{{ $order->customer_name }}</p>
+                                @if ($order->customer_phone)
+                                    <p class="mt-1 text-[11px] text-gray-400">{{ $order->customer_phone }}</p>
+                                @endif
+                            </div>
+                            <span class="rounded-lg bg-yellow-500/10 px-2 py-1 text-[10px] font-medium text-yellow-300">Menunggu pembayaran</span>
+                        </div>
+
+                        <div class="space-y-2 border-y border-gray-800 py-3 text-xs">
+                            @foreach ($pendingOrderItems->get($order->id, collect()) as $item)
+                                <div class="flex justify-between gap-3 text-gray-300">
+                                    <span>{{ $item->item_name }} × {{ number_format($item->quantity, 0, ',', '.') }}</span>
+                                    <span class="shrink-0">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="space-y-1 text-[11px] text-gray-400">
+                            <p>Pemenuhan: {{ ['pickup' => 'Ambil di bengkel', 'delivery' => 'Diantar bengkel', 'shipping' => 'Dikirim paket'][$order->fulfillment_method] ?? $order->fulfillment_method }}</p>
+                            @if ($order->delivery_address)
+                                <p>Alamat: {{ $order->delivery_address }}</p>
+                            @endif
+                            <p>Metode pembayaran: {{ ['cash' => 'Tunai', 'bank_transfer' => 'Transfer bank', 'qris' => 'QRIS', 'e_wallet' => 'E-wallet'][$order->payment_method] ?? $order->payment_method }}</p>
+                            <p class="pt-1 text-sm font-bold text-green-400">Total Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+                        </div>
+
+                        @if (in_array(auth()->user()->role, ['Owner', 'Kasir'], true))
+                            <form method="POST" action="{{ route('owner.kasir.pesanan.confirm', ['sale' => $order->id]) }}">
+                                @csrf
+                                <button type="submit" class="w-full rounded-xl bg-green-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-green-700">
+                                    Konfirmasi pembayaran & kurangi stok
+                                </button>
+                            </form>
+                        @endif
+                    </article>
+                @empty
+                    <p class="rounded-xl border border-dashed border-gray-700 bg-[#111827] px-4 py-8 text-center text-xs text-gray-400 xl:col-span-2">
+                        Belum ada pesanan sparepart dari konsumen.
+                    </p>
+                @endforelse
+            </div>
+        </section>
     </main>
 
+    <script>
+        (() => {
+            const method = document.getElementById('payment-method');
+            const amount = document.getElementById('amount-paid');
+            const amountField = document.getElementById('amount-paid-field');
+            const bankField = document.getElementById('bank-code-field');
+            const bank = document.getElementById('bank-code');
+            const help = document.getElementById('payment-help');
+
+            const updatePaymentFields = () => {
+                const isQris = method.value === 'qris';
+                const isTransfer = method.value === 'transfer';
+                amountField.hidden = isQris;
+                amount.disabled = isQris;
+                amount.required = !isQris;
+                bankField.hidden = !isTransfer;
+                bank.disabled = !isTransfer;
+                bank.required = isTransfer;
+                help.textContent = isQris
+                    ? 'QRIS Sandbox membuat tagihan simulasi; tidak menerima pembayaran uang sungguhan.'
+                    : isTransfer
+                        ? 'Pilih bank dan catat pembayaran setelah transfer terverifikasi oleh kasir.'
+                        : 'Total dihitung ulang dari katalog. Pembayaran tunai dapat menyertakan uang kembalian.';
+            };
+
+            method.addEventListener('change', updatePaymentFields);
+            updatePaymentFields();
+        })();
+    </script>
 </body>
 </html>

@@ -10,11 +10,11 @@
 <body class="bg-[#0b0f19] text-gray-200 min-h-screen font-sans flex">
 
     <!-- Sidebar Tenant -->
-    <aside class="w-64 bg-[#111827] border-r border-gray-800 flex flex-col justify-between hidden md:flex">
+    <aside class="w-64 bg-[#111827] border-r border-gray-700 flex flex-col justify-between hidden md:flex">
         <div>
             <!-- Brand / Logo -->
-            <div class="h-16 flex items-center px-6 border-b border-gray-800 space-x-3">
-                <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+            <div class="h-16 flex items-center px-6 border-b border-gray-700 space-x-3">
+                <div class="w-7 h-7 bg-amber-700 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -51,13 +51,19 @@
                     <span>🔔</span>
                     <span>Pengingat Service</span>
                 </a>
+                @if (auth()->user()->role === 'Owner')
+                    <a href="{{ route('owner.subscription') }}" class="flex items-center space-x-3 rounded-xl px-4 py-2.5 text-gray-400 transition hover:bg-[#1f2937] hover:text-white {{ request()->routeIs('owner.subscription') ? 'bg-[#1f2937] text-white' : '' }}">
+                        <span>🧾</span>
+                        <span>Langganan &amp; Tagihan</span>
+                    </a>
+                @endif
             </nav>
         </div>
 
         <!-- Profil Owner / Mekanik di Sidebar Bawah & Tombol Logout -->
-        <div class="p-4 border-t border-gray-800 space-y-3">
-            <div class="flex items-center space-x-3 bg-[#161e2e] p-2.5 rounded-xl border border-gray-800">
-                <div class="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+        <div class="p-4 border-t border-gray-700 space-y-3">
+            <div class="flex items-center space-x-3 bg-[#1f2937] p-2.5 rounded-xl border border-gray-700">
+                <div class="w-8 h-8 rounded-lg bg-amber-700 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
                 <div class="text-xs">
                     <p class="font-bold text-white">{{ auth()->user()->name }}</p>
                     <p class="text-[10px] text-gray-400">{{ auth()->user()->role }}</p>
@@ -77,7 +83,7 @@
     <main class="flex-1 flex min-w-0 flex-col min-h-screen">
         
         <!-- Top Navbar -->
-        <header class="min-h-16 h-auto bg-[#111827] border-b border-gray-800 flex flex-col justify-between gap-3 px-4 py-3 lg:flex-row lg:items-center lg:px-8">
+        <header class="min-h-16 h-auto bg-[#111827] border-b border-gray-700 flex flex-col justify-between gap-3 px-4 py-3 lg:flex-row lg:items-center lg:px-8">
             <div class="min-w-0">
                 <div class="flex items-center space-x-2">
                     <h1 class="text-xs font-bold text-white tracking-wide">{{ $tenantName }} — Ringkasan Bengkel</h1>
@@ -86,12 +92,7 @@
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-3">
-                @if (auth()->user()->role === 'Owner')
-                    <a href="{{ route('owner.settings') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-[10px] font-medium text-gray-300 transition hover:border-blue-500 hover:text-white sm:text-xs">
-                        Pengaturan Katalog & Pesanan
-                    </a>
-                @endif
-                <a href="{{ route('user.menu') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-[10px] font-medium text-gray-300 transition hover:border-blue-500 hover:text-white sm:text-xs">
+                <a href="{{ route('user.menu') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-700 px-3 py-2 text-[10px] font-medium text-gray-300 transition hover:border-amber-400 hover:text-white sm:text-xs">
                     <span aria-hidden="true">←</span>
                     <span>Kembali ke Akun Utama</span>
                 </a>
@@ -102,13 +103,16 @@
             </div>
         </header>
 
-        <nav aria-label="Navigasi tenant" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800 bg-[#111827] px-4 py-3 text-xs text-gray-400">
+        <nav aria-label="Navigasi tenant" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-700 bg-[#111827] px-4 py-3 text-xs text-gray-400">
             <a href="{{ route('owner.home') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.home') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Dashboard</a>
             <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
             <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
             <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
             <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
             <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
+            @if (auth()->user()->role === 'Owner')
+                <a href="{{ route('owner.subscription') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.subscription') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Langganan &amp; Tagihan</a>
+            @endif
             <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Akun Utama</a>
         </nav>
 
@@ -117,22 +121,22 @@
             
             <!-- 4 Kartu Metrik Utama Atas -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-[#111827] border border-gray-800 p-4 rounded-2xl shadow-lg relative">
+                <div class="bg-[#111827] border border-gray-700 p-4 rounded-2xl shadow-lg relative">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Pendapatan Hari Ini</p>
                     <h3 class="text-xl font-bold text-white mt-1">Rp {{ number_format($revenueToday, 0, ',', '.') }}</h3>
                     <p class="text-[10px] text-gray-400 font-medium mt-1">Penjualan selesai hari ini</p>
                 </div>
-                <div class="bg-[#111827] border border-gray-800 p-4 rounded-2xl shadow-lg relative">
+                <div class="bg-[#111827] border border-gray-700 p-4 rounded-2xl shadow-lg relative">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Unit Servis</p>
                     <h3 class="text-xl font-bold text-white mt-1">{{ $workOrdersToday }} Unit</h3>
-                    <p class="text-[10px] text-blue-400 font-medium mt-1">🔧 {{ $activeWorkOrdersCount }} Antrean Aktif</p>
+                    <p class="text-[10px] text-amber-300 font-medium mt-1">🔧 {{ $activeWorkOrdersCount }} Antrean Aktif</p>
                 </div>
-                <div class="bg-[#111827] border border-gray-800 p-4 rounded-2xl shadow-lg relative">
+                <div class="bg-[#111827] border border-gray-700 p-4 rounded-2xl shadow-lg relative">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Pengingat Terkirim</p>
                     <h3 class="text-xl font-bold text-white mt-1">{{ $remindersSentToday }}</h3>
                     <p class="text-[10px] text-yellow-400 font-medium mt-1">{{ $pendingRemindersCount }} Perlu Tindakan</p>
                 </div>
-                <div class="bg-[#111827] border border-gray-800 p-4 rounded-2xl shadow-lg relative">
+                <div class="bg-[#111827] border border-gray-700 p-4 rounded-2xl shadow-lg relative">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Stok Sparepart Kritis</p>
                     <h3 class="text-xl font-bold text-red-400 mt-1">{{ $criticalParts->count() }} Item</h3>
                     <p class="text-[10px] text-red-400 font-medium mt-1">🚨 Di bawah stok minimum</p>
@@ -143,7 +147,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- Grafik Pendapatan (2 Kolom) - Tinggi disesuaikan agar tidak terpotong -->
-                <div class="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+                <div class="lg:col-span-2 bg-[#111827] border border-gray-700 rounded-2xl p-6 shadow-lg space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-xs font-bold text-white">Grafik Pendapatan & Volume Servis Pekan Ini</h3>
@@ -152,7 +156,7 @@
                         <span class="text-[10px] bg-[#1f2937] text-gray-300 px-3 py-1 rounded-lg border border-gray-700">7 Hari Terakhir</span>
                     </div>
 
-                    <div class="min-h-60 bg-[#161e2e]/50 rounded-xl border border-gray-800 p-4">
+                    <div class="min-h-60 bg-[#1f2937]/50 rounded-xl border border-gray-700 p-4">
                         @php
                             $maxRevenue = max(1, $weeklyActivity->max('revenue'));
                         @endphp
@@ -160,7 +164,7 @@
                             @foreach ($weeklyActivity as $day)
                                 <div class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
                                     <span class="text-[9px] text-gray-400">Rp {{ number_format($day['revenue'], 0, ',', '.') }}</span>
-                                    <div class="w-full max-w-10 rounded-t bg-blue-500"
+                                    <div class="w-full max-w-10 rounded-t bg-amber-500"
                                         style="height: {{ $day['revenue'] > 0 ? max(4, ($day['revenue'] / $maxRevenue) * 100) : 2 }}%"></div>
                                     <span class="text-[9px] text-gray-400">{{ $day['label'] }}</span>
                                 </div>
@@ -173,8 +177,8 @@
                 </div>
 
                 <!-- Widget Samping Kanan: Pengingat Servis Otomatis -->
-                <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
-                    <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="bg-[#111827] border border-gray-700 rounded-2xl p-5 shadow-lg space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-700 pb-3">
                         <div>
                             <h4 class="text-xs font-bold text-white">Pengingat Servis Otomatis</h4>
                             <p class="text-[9px] text-gray-400">Jadwal ganti oli/sparepart berkala</p>
@@ -184,7 +188,7 @@
 
                     <div class="space-y-3 text-xs">
                         @forelse ($pendingReminders as $reminder)
-                            <div class="bg-[#161e2e] p-3 rounded-xl border border-gray-800 space-y-2">
+                            <div class="bg-[#1f2937] p-3 rounded-xl border border-gray-700 space-y-2">
                                 <div class="flex justify-between items-start gap-3">
                                     <div>
                                         <p class="font-bold text-white">{{ $reminder->customer_name ?? 'Pelanggan' }}{{ $reminder->vehicle_brand ? ' ('.$reminder->vehicle_brand.' '.$reminder->vehicle_model.')' : '' }}</p>
@@ -208,18 +212,18 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- Tabel Antrean Aktif (2 Kolom) -->
-                <div class="lg:col-span-2 bg-[#111827] border border-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+                <div class="lg:col-span-2 bg-[#111827] border border-gray-700 rounded-2xl p-6 shadow-lg space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <h3 class="text-xs font-bold text-white">Status Bay & Antrean Servis Aktif</h3>
                             <p class="text-[10px] text-gray-400">Daftar kendaraan yang sedang berada dalam penanganan atau antrean</p>
                         </div>
-                        <button class="text-xs text-blue-400 hover:underline">Refresh Status</button>
+                        <button class="text-xs text-amber-300 hover:underline">Refresh Status</button>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs text-gray-300">
-                            <thead class="text-gray-400 uppercase text-[9px] tracking-wider border-b border-gray-800 pb-2">
+                            <thead class="text-gray-400 uppercase text-[9px] tracking-wider border-b border-gray-700 pb-2">
                                 <tr>
                                     <th class="pb-3">No. Antrean</th>
                                     <th class="pb-3">Pelanggan / Kendaraan</th>
@@ -231,8 +235,8 @@
                             </thead>
                             <tbody class="divide-y divide-gray-800/60">
                                 @forelse ($activeWorkOrders as $workOrder)
-                                    <tr class="hover:bg-[#161e2e]/40">
-                                        <td class="py-3 font-mono font-bold text-blue-400">{{ $workOrder->work_order_number }}</td>
+                                    <tr class="hover:bg-[#1f2937]/40">
+                                        <td class="py-3 font-mono font-bold text-amber-300">{{ $workOrder->work_order_number }}</td>
                                         <td class="py-3">
                                             <p class="font-bold text-white">{{ $workOrder->customer_name }}</p>
                                             <p class="text-[10px] text-gray-400">{{ $workOrder->license_plate }} • {{ $workOrder->vehicle_brand }} {{ $workOrder->vehicle_model }}</p>
@@ -240,7 +244,7 @@
                                         <td class="py-3 text-gray-300">{{ $workOrder->complaint ?: 'Belum dicatat' }}</td>
                                         <td class="py-3 text-gray-300">{{ $workOrder->mechanic_name ?: 'Belum ditentukan' }}</td>
                                         <td class="py-3">
-                                            <span class="{{ $workOrder->status === 'waiting' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-blue-500/20 text-blue-400' }} px-2 py-0.5 rounded text-[10px] font-bold">
+                                            <span class="{{ $workOrder->status === 'waiting' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-amber-500/20 text-amber-300' }} px-2 py-0.5 rounded text-[10px] font-bold">
                                                 {{ $workOrder->status === 'waiting' ? 'MENUNGGU' : 'DIKERJAKAN' }}
                                             </span>
                                         </td>
@@ -259,8 +263,8 @@
                 </div>
 
                 <!-- Widget Samping: Stok Sparepart Kritis -->
-                <div class="bg-[#111827] border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
-                    <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                <div class="bg-[#111827] border border-gray-700 rounded-2xl p-5 shadow-lg space-y-4">
+                    <div class="flex items-center justify-between border-b border-gray-700 pb-3">
                         <div>
                             <h4 class="text-xs font-bold text-white">Stok Sparepart Kritis</h4>
                             <p class="text-[9px] text-gray-400">Item di bawah batas minimum</p>
@@ -270,7 +274,7 @@
 
                     <div class="space-y-3 text-xs">
                         @forelse ($criticalParts as $part)
-                            <div class="bg-[#161e2e] p-3 rounded-xl border border-gray-800 flex items-center justify-between gap-3">
+                            <div class="bg-[#1f2937] p-3 rounded-xl border border-gray-700 flex items-center justify-between gap-3">
                                 <div class="min-w-0">
                                     <p class="font-bold text-white">{{ $part->name }}</p>
                                     <p class="text-[10px] text-red-400 font-medium">
@@ -278,7 +282,7 @@
                                         (Min: {{ $part->minimum_stock }})
                                     </p>
                                 </div>
-                                <a href="{{ route('owner.stok') }}" class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow">Kelola Stok</a>
+                                <a href="{{ route('owner.stok') }}" class="shrink-0 bg-amber-700 hover:bg-amber-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow">Kelola Stok</a>
                             </div>
                         @empty
                             <p class="py-4 text-center text-[10px] text-gray-400">Tidak ada sparepart yang berada di bawah stok minimum.</p>

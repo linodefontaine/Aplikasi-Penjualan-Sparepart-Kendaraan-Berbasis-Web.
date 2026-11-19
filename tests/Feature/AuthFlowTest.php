@@ -44,10 +44,15 @@ class AuthFlowTest extends TestCase
             ->assertOk()
             ->assertSee(route('tenant.create'));
 
-        $this->post(route('tenant.store'), [
+        $registrationResponse = $this->post(route('tenant.store'), [
             'tenant_name' => 'Bengkel Satu',
             'subdomain' => 'bengkel-satu',
             'package' => 'starter',
+        ]);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
         ])->assertRedirect(route('owner.home'));
 
         $this->assertAuthenticated();
@@ -63,7 +68,7 @@ class AuthFlowTest extends TestCase
         $this->assertSame('Bengkel Satu', $tenant->getAttribute('tenant_name'));
         $this->assertSame('starter', $tenant->getAttribute('package'));
         $this->assertDatabaseHas('domains', [
-            'domain' => 'bengkel-satu.autozone.pro',
+            'domain' => 'bengkel-satu.yuma.yume.tech',
             'tenant_id' => $tenant->getTenantKey(),
         ]);
         Event::assertDispatched(TenantCreated::class);
@@ -90,6 +95,8 @@ class AuthFlowTest extends TestCase
             ->assertSee('0 Unit')
             ->assertSee('Belum ada antrean atau servis yang sedang berjalan.')
             ->assertSee('Tidak ada sparepart yang berada di bawah stok minimum.')
+            ->assertSee('Langganan & Tagihan')
+            ->assertSee(route('owner.subscription'))
             ->assertDontSee('Agus Setiawan')
             ->assertDontSee('Pak Joko')
             ->assertDontSee('B 1234 XYZ')
@@ -153,10 +160,10 @@ class AuthFlowTest extends TestCase
         ], 'Pemilik Baru', '081298765432');
 
         $this->actingAs(User::factory()->create(['role' => 'Pelanggan']))
-            ->get(route('user.menu', ['search' => 'bengkel-baru.autozone.pro']))
+            ->get(route('user.menu', ['search' => 'bengkel-baru.yuma.yume.tech']))
             ->assertOk()
             ->assertSee('Bengkel Baru')
-            ->assertSee('bengkel-baru.autozone.pro')
+            ->assertSee('bengkel-baru.yuma.yume.tech')
             ->assertSee('081298765432');
 
         $this->actingAs(User::factory()->create(['role' => 'Super Admin']))
@@ -575,8 +582,12 @@ class AuthFlowTest extends TestCase
             'password_confirmation' => 'password123',
         ])->assertRedirect(route('user.menu'));
 
-        $this->post(route('tenant.store'), $tenant)
-            ->assertRedirect(route('owner.home'));
+        $registrationResponse = $this->post(route('tenant.store'), $tenant);
+        $invoice = basename((string) parse_url($registrationResponse->headers->get('Location'), PHP_URL_PATH));
+        $registrationResponse->assertRedirect(route('tenant.checkout.show', ['invoice' => $invoice]));
+        $this->post(route('tenant.checkout.simulate', ['invoice' => $invoice]), [
+            'payment_method' => 'qris',
+        ])->assertRedirect(route('owner.home'));
 
         return Tenant::query()->findOrFail(auth()->user()->tenant_id);
     }
