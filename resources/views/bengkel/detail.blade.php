@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detail & Booking - AMAHAY</title>
+    <title>{{ $tenant->getAttribute('tenant_name') }} - AMAHAY</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -16,7 +16,7 @@
         <header
             class="border-b border-gray-800/80 bg-[#0b0f19]/80 backdrop-blur sticky top-0 z-50 flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4">
             <div class="flex min-w-0 items-center gap-2 sm:gap-4">
-                <a href="{{ route('user.menu') }}"
+                <a href="{{ auth()->check() ? route('user.menu') : route('public.bengkel') }}"
                     class="text-xs bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">
                     ← Kembali ke Pencarian
                 </a>
@@ -24,6 +24,7 @@
             </div>
             <!-- User Profile Pill -->
             <div class="relative">
+                @auth
                 <button onclick="toggleDropdown()"
                     class="flex max-w-[45vw] shrink-0 items-center space-x-2 bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-full text-xs cursor-pointer hover:border-gray-700 transition focus:outline-none">
                     <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center font-bold text-white">
@@ -53,14 +54,19 @@
                         <button type="submit" class="block w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10 transition font-medium">🚪 Keluar (Logout)</button>
                     </form>
                 </div>
+                @else
+                    <a href="{{ route('login') }}" class="rounded-full bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">Masuk / Daftar</a>
+                @endauth
             </div>
         </header>
 
         <nav aria-label="Navigasi konsumen" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800/80 px-4 py-2 text-xs text-gray-400">
-            <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg bg-[#161e2e] px-3 py-2 text-blue-400">Cari Bengkel</a>
-            <a href="{{ route('user.cek.servis') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cek Status</a>
-            <a href="{{ route('user.promo') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Promo</a>
-            <a href="{{ route('user.riwayat') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Riwayat</a>
+            <a href="{{ auth()->check() ? route('user.menu') : route('public.bengkel') }}" class="shrink-0 rounded-lg bg-[#161e2e] px-3 py-2 text-blue-400">Cari Bengkel</a>
+            @auth
+                <a href="{{ route('user.cek.servis') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cek Status</a>
+                <a href="{{ route('user.promo') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Promo</a>
+                <a href="{{ route('user.riwayat') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Riwayat</a>
+            @endauth
         </nav>
 
         <!-- Main Content -->
@@ -73,13 +79,35 @@
                         <span class="text-[10px] bg-blue-500/10 text-blue-400 font-semibold px-2.5 py-1 rounded-md">Bengkel Terdaftar</span>
                         <h1 class="text-xl md:text-2xl font-bold text-white mt-2">{{ $tenant->getAttribute('tenant_name') }}</h1>
                         <p class="text-xs text-gray-400 mt-1">{{ $tenant->domains->first()?->domain ?? 'Informasi domain belum tersedia' }}</p>
+                        <div class="mt-3 space-y-1 text-[11px] text-gray-400">
+                            @if ($tenant->owner)
+                                <p>Pemilik: <span class="text-gray-200">{{ $tenant->owner->name }}</span></p>
+                            @endif
+                            @if ($tenant->getAttribute('phone'))
+                                @php
+                                    $tenantPhoneDigits = preg_replace('/\D+/', '', (string) $tenant->getAttribute('phone'));
+                                    $whatsappNumber = str_starts_with($tenantPhoneDigits, '0')
+                                        ? '62'.substr($tenantPhoneDigits, 1)
+                                        : (str_starts_with($tenantPhoneDigits, '62') ? $tenantPhoneDigits : '62'.$tenantPhoneDigits);
+                                @endphp
+                                <p>Kontak: <a class="text-blue-300 hover:text-blue-200" href="tel:{{ $tenant->getAttribute('phone') }}">{{ $tenant->getAttribute('phone') }}</a></p>
+                                <a href="https://wa.me/{{ $whatsappNumber }}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex rounded-lg bg-green-700 px-3 py-2 text-[11px] font-semibold text-white transition hover:bg-green-600">
+                                    💬 Hubungi via WhatsApp
+                                </a>
+                            @endif
+                            <p>Paket: <span class="text-gray-200">{{ ucfirst((string) $tenant->getAttribute('package')) }}</span></p>
+                            @if ($tenant->getAttribute('address'))
+                                <p>Alamat: <span class="text-gray-200">{{ $tenant->getAttribute('address') }}</span></p>
+                            @endif
+                        </div>
                     </div>
-                    <div>
+                    <div class="flex flex-wrap gap-2">
                         <span class="text-xs bg-green-500/10 text-green-400 font-semibold px-2.5 py-1 rounded">Aktif</span>
-                        <p class="text-[11px] text-gray-400 mt-2">Jadwalkan servis melalui formulir booking</p>
-                        <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}"
-                            class="mt-3 inline-flex rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
-                            Lihat Katalog Sparepart
+                        <a href="#booking" class="inline-flex rounded-lg border border-gray-700 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:border-blue-500">
+                            Booking Servis
+                        </a>
+                        <a href="#katalog" class="inline-flex rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
+                            Katalog Sparepart
                         </a>
                     </div>
                 </div>
@@ -99,7 +127,9 @@
                             @forelse ($services as $service)
                                 <label class="flex items-center justify-between gap-3 p-4 bg-[#161e2e] border border-gray-800 rounded-xl cursor-pointer hover:border-blue-500 transition">
                                     <div class="flex items-center space-x-3">
-                                        <input type="radio" name="service_id" value="{{ $service->id }}" form="booking-form" data-price="{{ $service->price }}" class="service-option text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700" {{ $loop->first ? 'checked' : '' }}>
+                                        @auth
+                                            <input type="radio" name="service_id" value="{{ $service->id }}" form="booking-form" data-price="{{ $service->price }}" class="service-option text-blue-600 focus:ring-blue-500 bg-gray-900 border-gray-700" {{ $loop->first ? 'checked' : '' }}>
+                                        @endauth
                                         <div>
                                             <p class="text-xs font-bold text-white">{{ $service->name }}</p>
                                             @if ($service->description)
@@ -115,19 +145,44 @@
                         </div>
                     </div>
 
-                    <!-- Fasilitas Bengkel -->
-                    <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-lg">
-                        <h2 class="text-sm font-bold text-white mb-4">Fasilitas Bengkel</h2>
-                        <p class="text-xs text-gray-400">Informasi fasilitas belum dicantumkan oleh bengkel.</p>
+                    <div id="katalog" class="scroll-mt-24 bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-lg">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-sm font-bold text-white">Katalog Sparepart</h2>
+                                <p class="mt-1 text-[11px] text-gray-400">Stok dari inventaris {{ $tenant->getAttribute('tenant_name') }}.</p>
+                            </div>
+                            <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-700">
+                                Lihat Semua & Checkout
+                            </a>
+                        </div>
+                        <div class="mt-4 divide-y divide-gray-800">
+                            @forelse ($parts as $part)
+                                <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-white">{{ $part->name }}</p>
+                                        <p class="mt-1 text-[10px] text-gray-400">{{ $part->sku }} · Tersedia {{ number_format($part->available_stock, 0, ',', '.') }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-semibold text-blue-300">Rp {{ number_format($part->price, 0, ',', '.') }}</span>
+                                        <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey(), 'search' => $part->name]) }}" class="rounded-lg border border-gray-700 px-3 py-2 text-[11px] font-semibold text-gray-200 transition hover:border-blue-500 hover:text-white">
+                                            Beli / Checkout
+                                        </a>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="py-4 text-xs text-gray-400">Belum ada sparepart yang tersedia.</p>
+                            @endforelse
+                        </div>
                     </div>
 
                 </div>
 
                 <!-- Kolom Kanan: Form Booking Cepat (1 Span) -->
                 <div class="lg:col-span-1">
-                    <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-xl sticky top-24">
+                    <div id="booking" class="scroll-mt-24 bg-[#111827] border border-gray-800/80 rounded-2xl p-6 shadow-xl sticky top-24">
                         <h2 class="text-sm font-bold text-white mb-4">Formulir Booking Cepat</h2>
 
+                        @auth
                         <form id="booking-form" action="{{ route('user.bengkel.booking', ['id' => $tenant->getTenantKey()]) }}" method="POST" class="space-y-4 text-xs">
                             @csrf
                             @if ($vehicles->isNotEmpty())
@@ -204,6 +259,10 @@
                                 </button>
                             </div>
                         </form>
+                        @else
+                            <p class="text-xs leading-relaxed text-gray-400">Masuk sebagai pelanggan untuk mengisi booking servis ke bengkel ini.</p>
+                            <a href="{{ route('login') }}" class="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700">Masuk untuk Booking Servis</a>
+                        @endauth
                     </div>
                 </div>
 
@@ -242,11 +301,14 @@
 
         function toggleDropdown() {
             const dropdown = document.getElementById('profile-dropdown');
-            dropdown.classList.toggle('hidden');
+            dropdown?.classList.toggle('hidden');
         }
 
         window.addEventListener('click', function (e) {
             const dropdown = document.getElementById('profile-dropdown');
+            if (!dropdown) {
+                return;
+            }
             const button = dropdown.previousElementSibling;
             if (!button.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');

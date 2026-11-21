@@ -24,15 +24,18 @@
                 </div>
                 <!-- Menu Navigasi -->
                 <nav class="hidden md:flex items-center space-x-6 text-xs text-gray-400">
-                    <a href="#" class="text-blue-400 font-medium">Cari Bengkel</a>
-                    <a href="{{ route('user.cek.servis') }}" class="hover:text-white transition">Cek Status Servis</a>
-                    <a href="{{ route('user.promo') }}" class="hover:text-white transition">Promo</a>
-                    <a href="{{ route('user.riwayat') }}" class="hover:text-white transition">Riwayat</a>
+                    <a href="{{ auth()->check() ? route('user.menu') : route('public.bengkel') }}" class="text-blue-400 font-medium">Cari Bengkel</a>
+                    @auth
+                        <a href="{{ route('user.cek.servis') }}" class="hover:text-white transition">Cek Status Servis</a>
+                        <a href="{{ route('user.promo') }}" class="hover:text-white transition">Promo</a>
+                        <a href="{{ route('user.riwayat') }}" class="hover:text-white transition">Riwayat</a>
+                    @endauth
                 </nav>
             </div>
 
             <!-- User Profile dengan Dropdown Klik -->
             <div class="relative">
+                @auth
                 <!-- Tombol Profile -->
                 <button onclick="toggleDropdown()" 
                     class="flex items-center space-x-2 bg-[#161e2e] border border-gray-800 px-3 py-1.5 rounded-full text-xs cursor-pointer hover:border-gray-700 transition focus:outline-none">
@@ -57,14 +60,19 @@
                         <button type="submit" class="block w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10 transition font-medium">🚪 Keluar (Logout)</button>
                     </form>
                 </div>
+                @else
+                    <a href="{{ route('login') }}" class="rounded-full bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">Masuk / Daftar</a>
+                @endauth
             </div>
         </header>
 
         <nav class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800/80 px-4 py-2 text-xs text-gray-400">
-            <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg bg-[#161e2e] px-3 py-2 text-blue-400">Cari Bengkel</a>
-            <a href="{{ route('user.cek.servis') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cek Status Servis</a>
-            <a href="{{ route('user.promo') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Promo</a>
-            <a href="{{ route('user.riwayat') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Riwayat</a>
+            <a href="{{ auth()->check() ? route('user.menu') : route('public.bengkel') }}" class="shrink-0 rounded-lg bg-[#161e2e] px-3 py-2 text-blue-400">Cari Bengkel</a>
+            @auth
+                <a href="{{ route('user.cek.servis') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Cek Status Servis</a>
+                <a href="{{ route('user.promo') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Promo</a>
+                <a href="{{ route('user.riwayat') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#161e2e] hover:text-white">Riwayat</a>
+            @endauth
         </nav>
 
         <!-- Hero Search Section -->
@@ -73,7 +81,13 @@
             <p class="text-xs text-gray-400 mb-8">Temukan servis panggilan, lokasi bengkel, paket promo, dan sparepart motor</p>
             
             <!-- Search Bar -->
-            <form action="{{ route('user.menu') }}" method="GET" class="max-w-xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#161e2e] border border-gray-700/80 rounded-2xl p-1.5 shadow-xl">
+            @php
+                $directoryRoute = auth()->check() ? 'user.menu' : 'public.bengkel';
+            @endphp
+            <form action="{{ route($directoryRoute) }}" method="GET" class="max-w-xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-[#161e2e] border border-gray-700/80 rounded-2xl p-1.5 shadow-xl">
+                @if ($filter !== '')
+                    <input type="hidden" name="filter" value="{{ $filter }}">
+                @endif
                 <input type="search" name="search" value="{{ $search }}" placeholder="Cari nama bengkel atau domain..."
                     aria-label="Cari nama bengkel atau domain"
                     class="w-full min-w-0 bg-transparent px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none">
@@ -83,19 +97,38 @@
             </form>
 
             <!-- Quick Filter Badges -->
-            <div class="flex flex-wrap items-center justify-center gap-3 mt-6 text-xs text-gray-400">
-                <button class="bg-[#161e2e] border border-gray-800 px-3.5 py-1.5 rounded-lg hover:border-blue-500 transition">🔧 Terdekat</button>
-                <button class="bg-[#161e2e] border border-gray-800 px-3.5 py-1.5 rounded-lg hover:border-blue-500 transition">⚡ Ganti Oli</button>
-                <button class="bg-[#161e2e] border border-gray-800 px-3.5 py-1.5 rounded-lg hover:border-blue-500 transition">🛠️ Servis Besar</button>
-                <button class="bg-[#161e2e] border border-gray-800 px-3.5 py-1.5 rounded-lg hover:border-blue-500 transition">🛵 Booking & Antrean</button>
-                <button class="bg-[#161e2e] border border-gray-800 px-3.5 py-1.5 rounded-lg hover:border-blue-500 transition">📦 Stok Suku Cadang</button>
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs text-gray-400">
+                @foreach ($filterLabels as $filterKey => $filterLabel)
+                    @php
+                        $filterIcon = match ($filterKey) {
+                            'terdekat' => '🔧',
+                            'ganti-oli' => '⚡',
+                            'servis-besar' => '🛠️',
+                            'booking' => '🛵',
+                            'stok-sparepart' => '📦',
+                        };
+                        $isFilterActive = $filter === $filterKey;
+                    @endphp
+                    <a href="{{ route($directoryRoute, ['search' => $search !== '' ? $search : null, 'filter' => $filterKey]) }}"
+                        @if ($isFilterActive) aria-current="true" @endif
+                        class="{{ $isFilterActive ? 'border-blue-500 bg-blue-600/20 text-blue-300' : 'border-gray-800 bg-[#161e2e] text-gray-400 hover:border-blue-500 hover:text-white' }} rounded-lg border px-3.5 py-1.5 transition">
+                        {{ $filterIcon }} {{ $filterLabel }}
+                    </a>
+                @endforeach
+                <a href="{{ route($directoryRoute, ['search' => $search !== '' ? $search : null]) }}"
+                    @if ($filter === '') aria-current="true" @endif
+                    class="{{ $filter === '' ? 'border-blue-500 bg-blue-600/20 text-blue-300' : 'border-gray-800 bg-[#161e2e] text-gray-400 hover:border-blue-500 hover:text-white' }} rounded-lg border px-3.5 py-1.5 transition">
+                    Semua
+                </a>
             </div>
 
             <div class="mt-8 rounded-2xl border border-blue-500/20 bg-[#111827] p-5 text-left shadow-lg sm:flex sm:items-center sm:justify-between sm:gap-6">
                 <div>
                     <h2 class="text-sm font-bold text-white">Punya bengkel?</h2>
                     <p class="mt-1 text-xs text-gray-400">
-                        @if (auth()->user()->role === 'Owner' && $accountTenant?->isActive())
+                        @guest
+                            Masuk atau daftar sebagai pemilik untuk mengelola bengkel di AMAHAY.
+                        @elseif (auth()->user()->role === 'Owner' && $accountTenant?->isActive())
                             Akun utama Anda sudah terhubung dengan tenant bengkel.
                         @elseif (auth()->user()->role === 'Owner')
                             Akses tenant bengkel Anda sedang dinonaktifkan atau diblokir. Hubungi administrator platform.
@@ -105,7 +138,11 @@
                     </p>
                 </div>
                 <div class="mt-4 flex w-full flex-col gap-2 sm:mt-0 sm:w-auto sm:flex-row">
-                    @if (auth()->user()->role === 'Owner' && $accountTenant?->isActive())
+                    @guest
+                        <a href="{{ route('login') }}" class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-medium text-white transition hover:bg-blue-700 sm:w-auto">
+                            Masuk / Daftar
+                        </a>
+                    @elseif (auth()->user()->role === 'Owner' && $accountTenant?->isActive())
                         <a href="{{ route('owner.home') }}" class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-medium text-white transition hover:bg-blue-700 sm:w-auto">
                             Masuk ke Dashboard Tenant
                         </a>
@@ -138,13 +175,15 @@
                         $tenantPhone = $tenant->getAttribute('phone');
                         $tenantDomain = $tenant->domains->first()?->domain;
                     @endphp
-                    <article class="bg-[#111827] border border-gray-800/80 rounded-2xl p-5 shadow-lg flex flex-col justify-between gap-5">
+                    <article class="relative bg-[#111827] border border-gray-800/80 rounded-2xl p-5 shadow-lg flex flex-col justify-between gap-5">
                         <div>
                             <div class="text-[10px] text-gray-500 mb-2">
                                 Paket {{ ucfirst((string) $tenant->getAttribute('package')) }}
                             </div>
                             <h3 class="text-sm font-bold text-white mb-3 break-words">
-                                {{ $tenant->getAttribute('tenant_name') }}
+                                <a href="{{ route('user.bengkel.detail', ['id' => $tenant->getTenantKey()]) }}" class="after:absolute after:inset-0 after:content-[''] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                    {{ $tenant->getAttribute('tenant_name') }}
+                                </a>
                             </h3>
                             <div class="space-y-2 text-xs text-gray-400">
                                 @if ($tenantDomain)
@@ -158,16 +197,19 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($tenantPhone)
-                            <a href="tel:{{ $tenantPhone }}" class="block w-full text-center bg-[#1f2937] hover:bg-blue-600 hover:text-white text-gray-300 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
-                                Hubungi Bengkel
+                        <div class="relative z-10 flex flex-col gap-2">
+                            <a href="{{ route('user.bengkel.detail', ['id' => $tenant->getTenantKey()]) }}" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl text-xs transition duration-200">
+                                Booking & Detail Bengkel
                             </a>
-                        @endif
+                            <a href="{{ route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]) }}" class="block w-full text-center bg-[#1f2937] hover:bg-gray-700 text-gray-200 font-medium py-2.5 rounded-xl text-xs transition duration-200 border border-gray-700/50">
+                                Beli Sparepart
+                            </a>
+                        </div>
                     </article>
                 @empty
                     <div class="sm:col-span-2 lg:col-span-3 rounded-2xl border border-dashed border-gray-700 bg-[#111827] px-5 py-10 text-center">
                         <p class="text-sm font-semibold text-white">
-                            {{ $search ? 'Bengkel tidak ditemukan.' : 'Belum ada bengkel yang terdaftar.' }}
+                            {{ $search ? 'Bengkel tidak ditemukan.' : ($filter ? 'Belum ada bengkel yang sesuai filter '.$filterLabels[$filter].'.' : 'Belum ada bengkel yang terdaftar.') }}
                         </p>
                         <p class="mt-2 text-xs text-gray-400">
                             {{ $search ? 'Coba kata kunci lain.' : 'Bengkel baru akan muncul di sini setelah mendaftar.' }}
@@ -197,12 +239,15 @@
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('profile-dropdown');
-            dropdown.classList.toggle('hidden');
+            dropdown?.classList.toggle('hidden');
         }
 
         // Menutup dropdown jika pengguna mengklik di luar area menu
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('profile-dropdown');
+            if (!dropdown) {
+                return;
+            }
             const button = dropdown.previousElementSibling;
             if (!button.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');

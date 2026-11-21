@@ -5,6 +5,7 @@ namespace App\Modules\Workshop\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Modules\Platform\Services\TenantPackageCatalog;
+use App\Modules\Workshop\Payments\DemoPaymentMethods;
 use App\Modules\Workshop\Payments\Exceptions\GatewayUnavailableException;
 use App\Modules\Workshop\Payments\PaymentService;
 use Illuminate\Database\Query\Builder;
@@ -113,6 +114,7 @@ class OwnerOperationsController extends Controller
                 'pendingOrderItems' => $pendingOrderItems,
                 'recentSales' => DB::table('sales')
                     ->leftJoin('customers', 'customers.id', '=', 'sales.customer_id')
+                    ->leftJoin('payments', 'payments.sale_id', '=', 'sales.id')
                     ->latest('sales.created_at')
                     ->limit(10)
                     ->get([
@@ -121,6 +123,8 @@ class OwnerOperationsController extends Controller
                         'sales.total',
                         'sales.sold_at',
                         'customers.name as customer_name',
+                        'payments.payment_method',
+                        'payments.status as payment_status',
                     ]),
             ];
         });
@@ -137,7 +141,7 @@ class OwnerOperationsController extends Controller
         $validated = $request->validate([
             'checkout_idempotency_key' => ['required', 'uuid'],
             'customer_id' => ['nullable', 'integer'],
-            'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris'])],
+            'payment_method' => ['required', Rule::in(['cash', 'transfer', ...DemoPaymentMethods::ONLINE_METHODS])],
             'amount_paid' => ['nullable', 'required_if:payment_method,cash,transfer', 'numeric', 'min:0'],
             'bank_code' => [
                 Rule::requiredIf($request->input('payment_method') === 'transfer'),
@@ -152,6 +156,7 @@ class OwnerOperationsController extends Controller
             'services.*' => ['integer'],
         ]);
         $paymentMethod = $validated['payment_method'];
+        $isDeferredPayment = in_array($paymentMethod, DemoPaymentMethods::ONLINE_METHODS, true);
         if ($paymentMethod === 'qris' && ! config('services.qris.sandbox_enabled')) {
             throw ValidationException::withMessages([
                 'payment_method' => 'Pembayaran QRIS belum dikonfigurasi untuk lingkungan ini.',
@@ -162,7 +167,7 @@ class OwnerOperationsController extends Controller
         $payloadForHash = [
             'customer_id' => $validated['customer_id'] ?? null,
             'payment_method' => $paymentMethod,
-            'amount_paid' => $paymentMethod === 'qris'
+            'amount_paid' => $isDeferredPayment
                 ? null
                 : number_format((float) $validated['amount_paid'], 2, '.', ''),
             'bank_code' => $validated['bank_code'] ?? null,
@@ -190,6 +195,7 @@ class OwnerOperationsController extends Controller
                 $validated,
                 $request,
                 $paymentMethod,
+                $isDeferredPayment,
                 $checkoutIdempotencyKey,
                 $checkoutPayloadHash,
             ): array {
@@ -197,6 +203,7 @@ class OwnerOperationsController extends Controller
                     $validated,
                     $request,
                     $paymentMethod,
+                    $isDeferredPayment,
                     $checkoutIdempotencyKey,
                     $checkoutPayloadHash,
                 ): array {
@@ -313,7 +320,7 @@ class OwnerOperationsController extends Controller
                         fn (array $item): float => $item['unit_price'] * $item['quantity'],
                         $lineItems,
                     )), 2);
-                    $amountPaid = $paymentMethod === 'qris'
+                    $amountPaid = $isDeferredPayment
                         ? 0
                         : round((float) $validated['amount_paid'], 2);
 
@@ -324,7 +331,7 @@ class OwnerOperationsController extends Controller
                         ]);
                     }
 
-                    if ($paymentMethod !== 'qris'
+                    if (! $isDeferredPayment
                         && ($amountPaid < $total || ($paymentMethod !== 'cash' && $amountPaid !== $total))) {
                         throw ValidationException::withMessages([
                             'amount_paid' => $paymentMethod === 'cash'
@@ -340,14 +347,14 @@ class OwnerOperationsController extends Controller
                         'checkout_idempotency_key' => $checkoutIdempotencyKey,
                         'checkout_payload_hash' => $checkoutPayloadHash,
                         'customer_id' => $customerId,
-                        'status' => $paymentMethod === 'qris' ? 'pending' : 'completed',
+                        'status' => $isDeferredPayment ? 'pending' : 'completed',
                         'subtotal' => $total,
                         'discount' => 0,
                         'tax' => 0,
                         'total' => $total,
                         'amount_paid' => $amountPaid,
-                        'change_due' => $paymentMethod === 'qris' ? 0 : round($amountPaid - $total, 2),
-                        'sold_at' => $paymentMethod === 'qris' ? null : $now,
+                        'change_due' => $isDeferredPayment ? 0 : round($amountPaid - $total, 2),
+                        'sold_at' => $isDeferredPayment ? null : $now,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]);
@@ -395,9 +402,9 @@ class OwnerOperationsController extends Controller
                         'sale_id' => $saleId,
                         'payment_method' => $paymentMethod,
                         'amount' => $total,
-                        'status' => $paymentMethod === 'qris' ? 'pending' : 'completed',
+                        'status' => $isDeferredPayment ? 'pending' : 'completed',
                         'reference_number' => null,
-                        'paid_at' => $paymentMethod === 'qris' ? null : $now,
+                        'paid_at' => $isDeferredPayment ? null : $now,
                         'notes' => $paymentMethod === 'transfer'
                             ? 'Bank pengirim: '.config('services.bank_transfer.banks.'.$validated['bank_code'])
                             : null,
@@ -446,20 +453,22 @@ class OwnerOperationsController extends Controller
             });
         }
 
-        if ($checkout['payment_method'] === 'qris') {
-            try {
-                $tenant->run(fn () => $paymentService->createQrisAttempt($checkout['payment_id']));
-            } catch (GatewayUnavailableException $exception) {
-                report($exception);
+        if (in_array($checkout['payment_method'], DemoPaymentMethods::ONLINE_METHODS, true)) {
+            if ($checkout['payment_method'] === 'qris') {
+                try {
+                    $tenant->run(fn () => $paymentService->createQrisAttempt($checkout['payment_id']));
+                } catch (GatewayUnavailableException $exception) {
+                    report($exception);
 
-                return redirect()
-                    ->route('owner.kasir.payment.show', ['invoice' => $checkout['invoice_number']])
-                    ->with('error', 'QRIS sandbox sedang mengalami gangguan. Coba buat tagihan kembali.');
+                    return redirect()
+                        ->route('owner.kasir.payment.show', ['invoice' => $checkout['invoice_number']])
+                        ->with('error', 'QRIS sandbox sedang mengalami gangguan. Coba buat tagihan kembali.');
+                }
             }
 
             return redirect()
                 ->route('owner.kasir.payment.show', ['invoice' => $checkout['invoice_number']])
-                ->with('success', 'Tagihan QRIS sandbox berhasil dibuat.');
+                ->with('success', 'Transaksi menunggu pembayaran.');
         }
 
         return redirect()->route('owner.kasir')

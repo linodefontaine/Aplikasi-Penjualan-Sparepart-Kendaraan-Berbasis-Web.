@@ -13,6 +13,111 @@ class TenantMarketplaceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_public_customer_directory_and_tenant_catalog_are_available_without_sign_in(): void
+    {
+        $tenant = $this->createTenantForMainAccount('081298765438');
+        $otherTenant = $this->createTenantForMainAccount('081298765439');
+        $this->configureMarketplace($tenant);
+        $this->createPart($tenant, 3);
+        $this->createPart($otherTenant, 5, 'Sparepart Tenant Lain');
+        $tenant->run(function (): void {
+            DB::table('service_catalog')->insert([
+                [
+                    'service_code' => 'SRV-OIL',
+                    'name' => 'Ganti Oli',
+                    'description' => 'Perawatan oli mesin',
+                    'price' => 50000,
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'service_code' => 'SRV-MAJOR',
+                    'name' => 'Servis Besar',
+                    'description' => 'Overhaul mesin',
+                    'price' => 250000,
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]);
+        });
+
+        try {
+            $this->get(route('user.menu'))
+                ->assertOk()
+                ->assertSee(route('user.bengkel.detail', ['id' => $tenant->getTenantKey()]))
+                ->assertSeeText('Booking & Detail Bengkel')
+                ->assertSee('Beli Sparepart')
+                ->assertDontSee('Hubungi via WhatsApp');
+
+            $this->get(route('user.menu', [
+                'search' => 'Marketplace',
+                'filter' => 'ganti-oli',
+            ]))
+                ->assertOk()
+                ->assertSee('name="filter" value="ganti-oli"', false)
+                ->assertSee(route('user.menu', ['search' => 'Marketplace', 'filter' => 'servis-besar']))
+                ->assertSee(route('user.menu', ['search' => 'Marketplace']))
+                ->assertSee('Bengkel Marketplace 765438')
+                ->assertDontSee('Bengkel Marketplace 765439');
+
+            $this->get(route('user.menu', ['filter' => 'servis-besar']))
+                ->assertOk()
+                ->assertSee('Bengkel Marketplace 765438')
+                ->assertDontSee('Bengkel Marketplace 765439');
+
+            $this->get(route('user.menu', ['filter' => 'booking']))
+                ->assertOk()
+                ->assertSee('Bengkel Marketplace 765438')
+                ->assertSee('Bengkel Marketplace 765439');
+
+            $this->get(route('user.menu', ['filter' => 'terdekat']))
+                ->assertOk()
+                ->assertSeeInOrder(['Bengkel Marketplace 765438', 'Bengkel Marketplace 765439']);
+
+            $this->get(route('user.menu', ['filter' => 'stok-sparepart']))
+                ->assertOk()
+                ->assertSee('Bengkel Marketplace 765438')
+                ->assertSee('Bengkel Marketplace 765439');
+
+            auth()->logout();
+
+            $this->get(route('home'))
+                ->assertOk()
+                ->assertSee(route('public.bengkel'));
+
+            $this->get(route('public.bengkel'))
+                ->assertOk()
+                ->assertSee('Bengkel Marketplace')
+                ->assertSee('Beli Sparepart')
+                ->assertDontSee('Hubungi via WhatsApp');
+
+            $this->get(route('user.bengkel.detail', ['id' => $tenant->getTenantKey()]))
+                ->assertOk()
+                ->assertSee('Bengkel Marketplace')
+                ->assertSee('Booking Servis')
+                ->assertSee('Kampas Rem Marketplace')
+                ->assertSee('Tersedia 3')
+                ->assertSee('Beli / Checkout')
+                ->assertSee('Hubungi via WhatsApp')
+                ->assertSee('Masuk untuk Booking Servis')
+                ->assertDontSee('Sparepart Tenant Lain');
+
+            $this->get(route('user.bengkel.katalog', ['id' => $tenant->getTenantKey()]))
+                ->assertOk()
+                ->assertSee('Kampas Rem Marketplace')
+                ->assertSee('Tersedia 3')
+                ->assertDontSee('Sparepart Tenant Lain')
+                ->assertDontSee('Checkout Sparepart');
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+            $otherTenant->delete();
+        }
+    }
+
     public function test_customer_can_order_from_a_tenant_catalog_without_immediate_stock_deduction(): void
     {
         $tenant = $this->createTenantForMainAccount('081298765431');
@@ -78,8 +183,12 @@ class TenantMarketplaceTest extends TestCase
             ]))
                 ->assertOk()
                 ->assertSee($invoice)
-                ->assertSee('Transfer ke rekening marketplace.')
-                ->assertSee('Website ini belum menggunakan payment gateway.');
+                ->assertSee('Pilih metode pembayaran')
+                ->assertSee('Virtual Account BCA')
+                ->assertSee('Virtual Account BRI')
+                ->assertSee('Virtual Account BNI')
+                ->assertSee('Virtual Account Mandiri')
+                ->assertSee('Bayar di Tempat / Ambil di Toko');
 
             $otherCustomer = User::factory()->create(['role' => 'Pelanggan']);
             $this->actingAs($otherCustomer)
@@ -169,6 +278,171 @@ class TenantMarketplaceTest extends TestCase
 
             $this->post(route('owner.kasir.pesanan.confirm', ['sale' => $saleId]))
                 ->assertNotFound();
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+        }
+    }
+
+    public function test_customer_can_simulate_payment_and_cannot_access_an_invoice_through_another_tenant(): void
+    {
+        $tenant = $this->createTenantForMainAccount('081298765435');
+        $this->configureMarketplace($tenant);
+        $partId = $this->createPart($tenant, 3);
+        $otherTenant = $this->createTenantForMainAccount('081298765436');
+        $otherPartId = $this->createPart($otherTenant, 4);
+        $customer = User::factory()->create(['role' => 'Pelanggan']);
+
+        try {
+            $response = $this->actingAs($customer)->post(
+                route('user.bengkel.pesanan.store', ['id' => $tenant->getTenantKey()]),
+                [
+                    'items' => [
+                        ['part_id' => $partId, 'quantity' => 2],
+                    ],
+                    'payment_method' => 'qris',
+                    'fulfillment_method' => 'pickup',
+                ],
+            );
+            $invoice = basename((string) parse_url($response->headers->get('Location'), PHP_URL_PATH));
+
+            $this->actingAs($customer)
+                ->get(route('user.riwayat'))
+                ->assertOk()
+                ->assertSee($invoice)
+                ->assertSee('Bayar Sekarang');
+
+            $this->post(route('user.bengkel.pembayaran.metode', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]), ['payment_method' => 'va_bca'])
+                ->assertRedirect(route('user.bengkel.pembayaran', [
+                    'id' => $tenant->getTenantKey(),
+                    'invoice' => $invoice,
+                ]));
+
+            $this->post(route('user.bengkel.pembayaran.simulasi', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]), ['payment_method' => 'va_bca'])
+                ->assertRedirect(route('user.bengkel.pembayaran', [
+                    'id' => $tenant->getTenantKey(),
+                    'invoice' => $invoice,
+                ]));
+
+            $this->get(route('user.bengkel.pembayaran', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]))
+                ->assertOk()
+                ->assertSee('Struk Lunas')
+                ->assertSee('Cetak struk');
+
+            $this->actingAs($customer)
+                ->get(route('user.riwayat'))
+                ->assertOk()
+                ->assertSee($invoice)
+                ->assertSee('Lihat Struk');
+
+            $tenant->run(function () use ($invoice, $partId): void {
+                $sale = DB::table('sales')->where('invoice_number', $invoice)->first();
+                $this->assertSame('completed', $sale->status);
+                $this->assertDatabaseHas('payments', [
+                    'sale_id' => $sale->id,
+                    'payment_method' => 'va_bca',
+                    'status' => 'completed',
+                ]);
+                $this->assertDatabaseHas('spare_parts', ['id' => $partId, 'stock' => 1]);
+                $this->assertDatabaseCount('inventory_movements', 1);
+            });
+
+            $this->actingAs($customer)
+                ->get(route('user.bengkel.pembayaran', [
+                    'id' => $otherTenant->getTenantKey(),
+                    'invoice' => $invoice,
+                ]))
+                ->assertNotFound();
+
+            $this->post(route('user.bengkel.pembayaran.simulasi', [
+                'id' => $otherTenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]), ['payment_method' => 'va_bca'])
+                ->assertNotFound();
+
+            $otherTenant->run(function () use ($otherPartId): void {
+                $this->assertDatabaseCount('sales', 0);
+                $this->assertDatabaseHas('spare_parts', ['id' => $otherPartId, 'stock' => 4]);
+                $this->assertDatabaseCount('inventory_movements', 0);
+            });
+        } finally {
+            tenancy()->end();
+            DB::purge('tenant');
+            $tenant->delete();
+            $otherTenant->delete();
+        }
+    }
+
+    public function test_customer_qris_checkout_renders_a_demo_code_and_completes_the_sale(): void
+    {
+        config([
+            'services.qris.sandbox_enabled' => true,
+            'services.qris.fake_unavailable' => false,
+        ]);
+        $tenant = $this->createTenantForMainAccount('081298765437');
+        $this->configureMarketplace($tenant);
+        $partId = $this->createPart($tenant, 2);
+        $customer = User::factory()->create(['role' => 'Pelanggan']);
+
+        try {
+            $response = $this->actingAs($customer)->post(
+                route('user.bengkel.pesanan.store', ['id' => $tenant->getTenantKey()]),
+                [
+                    'items' => [
+                        ['part_id' => $partId, 'quantity' => 1],
+                    ],
+                    'payment_method' => 'qris',
+                    'fulfillment_method' => 'pickup',
+                ],
+            );
+            $invoice = basename((string) parse_url($response->headers->get('Location'), PHP_URL_PATH));
+
+            $this->post(route('user.bengkel.pembayaran.metode', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]), ['payment_method' => 'qris'])
+                ->assertRedirect(route('user.bengkel.pembayaran', [
+                    'id' => $tenant->getTenantKey(),
+                    'invoice' => $invoice,
+                ]));
+
+            $this->get(route('user.bengkel.pembayaran', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]))
+                ->assertOk()
+                ->assertSee('<svg', false)
+                ->assertSee('Simulasi Pembayaran Berhasil');
+
+            $this->post(route('user.bengkel.pembayaran.simulasi', [
+                'id' => $tenant->getTenantKey(),
+                'invoice' => $invoice,
+            ]), ['payment_method' => 'qris'])
+                ->assertRedirect(route('user.bengkel.pembayaran', [
+                    'id' => $tenant->getTenantKey(),
+                    'invoice' => $invoice,
+                ]));
+
+            $tenant->run(function () use ($invoice, $partId): void {
+                $sale = DB::table('sales')->where('invoice_number', $invoice)->first();
+                $this->assertSame('completed', $sale->status);
+                $this->assertDatabaseHas('payments', [
+                    'sale_id' => $sale->id,
+                    'payment_method' => 'qris',
+                    'status' => 'completed',
+                ]);
+                $this->assertDatabaseHas('spare_parts', ['id' => $partId, 'stock' => 1]);
+            });
         } finally {
             tenancy()->end();
             DB::purge('tenant');
@@ -314,11 +588,11 @@ class TenantMarketplaceTest extends TestCase
         $tenant->save();
     }
 
-    private function createPart(Tenant $tenant, int $stock): int
+    private function createPart(Tenant $tenant, int $stock, string $name = 'Kampas Rem Marketplace'): int
     {
         return $tenant->run(fn (): int => DB::table('spare_parts')->insertGetId([
             'sku' => 'MARKETPLACE-PART-001',
-            'name' => 'Kampas Rem Marketplace',
+            'name' => $name,
             'stock' => $stock,
             'price' => 75000,
             'category' => 'Rem',

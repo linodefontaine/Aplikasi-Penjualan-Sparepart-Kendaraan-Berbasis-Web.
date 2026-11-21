@@ -161,6 +161,19 @@
                             <span class="text-[10px] bg-gray-700/50 text-gray-300 px-2.5 py-1 rounded font-medium">{{ $workOrder->status_label }}</span>
                         </div>
                     </div>
+
+                    @if ($workOrder->unpaid_payments->isNotEmpty())
+                        <div class="space-y-2 border-t border-gray-800 pt-4">
+                            <p class="text-xs font-semibold text-amber-300">Tagihan belum dibayar</p>
+                            @foreach ($workOrder->unpaid_payments as $payment)
+                                <a href="{{ route('user.bengkel.pembayaran', ['id' => $payment->tenant_id, 'invoice' => $payment->invoice_number]) }}" class="flex items-center justify-between gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 text-xs transition hover:bg-blue-500/20">
+                                    <span class="font-mono text-blue-300">{{ $payment->invoice_number }}</span>
+                                    <span>Rp {{ number_format($payment->total, 0, ',', '.') }}</span>
+                                    <span class="font-semibold text-blue-300">Bayar Sekarang</span>
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 text-center shadow-lg">

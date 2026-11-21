@@ -14,7 +14,7 @@
         <div>
             <!-- Brand / Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-700 space-x-3">
-                <div class="w-7 h-7 bg-amber-700 rounded-lg flex items-center justify-center shadow-md">
+                <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -24,23 +24,23 @@
 
             <!-- Menu Sidebar -->
             <nav class="p-4 space-y-1.5 text-xs">
-                <a href="/superadmin/dashboard" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-dashboard') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/dashboard" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.home') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📊</span>
                     <span>Dashboard Global</span>
                 </a>
-                <a href="/superadmin/tenant" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/tenant" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.tenant') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>🏢</span>
                     <span>Kelola Bengkel (Tenant)</span>
                 </a>
-                <a href="/superadmin/laporan" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-laporan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/laporan" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.laporan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>💵</span>
                     <span>Laporan Keuangan</span>
                 </a>
-                <a href="/superadmin/paket" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-paket') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/paket" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.paket') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📦</span>
                     <span>Manajemen Paket</span>
                 </a>
-                <a href="/superadmin/pengaturan" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-pengaturan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/pengaturan" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.pengaturan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>⚙️</span>
                     <span>Pengaturan Platform</span>
                 </a>
@@ -69,8 +69,8 @@
                 <time id="admin-clock" class="mt-1 block text-xs font-bold text-white" datetime="{{ now('Asia/Jakarta')->toIso8601String() }}">{{ now('Asia/Jakarta')->format('H:i:s') }} WIB</time>
                 <time id="admin-date" class="block text-[10px] text-gray-400" datetime="{{ now('Asia/Jakarta')->toDateString() }}">{{ now('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y') }}</time>
             </div>
-            <a href="{{ route('superadmin.profile.edit') }}" class="flex min-w-0 items-center gap-2 rounded-full border border-gray-700 bg-[#1f2937] px-3 py-1.5 text-xs transition hover:border-amber-400">
-                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-700 font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+            <a href="{{ route('superadmin.profile.edit') }}" class="flex min-w-0 items-center gap-2 rounded-full border border-gray-700 bg-[#1f2937] px-3 py-1.5 text-xs transition hover:border-emerald-400">
+                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 font-bold text-white">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                 <span class="min-w-0 text-left">
                     <span class="block truncate font-medium text-white">{{ auth()->user()->name }}</span>
                     <span class="block text-[10px] text-gray-400">Profil Super Admin</span>
@@ -80,7 +80,7 @@
         </header>
 
         <nav class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-700 bg-[#111827] px-4 py-3 text-xs text-gray-400">
-            <a href="{{ route('superadmin.home') }}" class="shrink-0 rounded-lg bg-[#1f2937] px-3 py-2 text-white">Dashboard</a>
+            <a href="{{ route('superadmin.home') }}" class="shrink-0 rounded-lg bg-emerald-500/10 px-3 py-2 text-emerald-300 ring-1 ring-emerald-500/30">Dashboard</a>
             <a href="{{ route('superadmin.tenant') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Tenant</a>
             <a href="{{ route('superadmin.laporan') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Laporan</a>
             <a href="{{ route('superadmin.paket') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Paket</a>
@@ -105,8 +105,8 @@
                 </div>
                 <div class="bg-[#111827] border border-gray-700 p-5 rounded-2xl shadow-lg space-y-2">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Omset Tenant Bulan Ini</p>
-                    <h3 class="text-2xl font-bold text-amber-300">Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</h3>
-                    <p class="text-[11px] text-amber-200 font-medium">Dari transaksi selesai di database tenant</p>
+                    <h3 class="text-2xl font-bold text-emerald-300">Rp {{ number_format($monthlyRevenue, 0, ',', '.') }}</h3>
+                    <p class="text-[11px] text-emerald-200 font-medium">Dari transaksi selesai di database tenant</p>
                 </div>
                 <div class="bg-[#111827] border border-gray-700 p-5 rounded-2xl shadow-lg space-y-2">
                     <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Servis Bulan Ini</p>

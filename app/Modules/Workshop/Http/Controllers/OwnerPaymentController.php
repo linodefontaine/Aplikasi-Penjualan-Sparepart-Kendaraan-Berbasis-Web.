@@ -4,6 +4,7 @@ namespace App\Modules\Workshop\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Modules\Workshop\Payments\DemoPaymentMethods;
 use App\Modules\Workshop\Payments\Exceptions\GatewayUnavailableException;
 use App\Modules\Workshop\Payments\PaymentService;
 use App\Modules\Workshop\Payments\QrisSvgRenderer;
@@ -24,7 +25,10 @@ class OwnerPaymentController extends Controller
             abort_if($sale === null, 404);
 
             $payment = DB::table('payments')->where('sale_id', $sale->id)->first();
-            abort_if($payment === null || $payment->payment_method !== 'qris', 404);
+            abort_if(
+                $payment === null || ! in_array($payment->payment_method, DemoPaymentMethods::ONLINE_METHODS, true),
+                404,
+            );
 
             $attempt = DB::table('payment_attempts')
                 ->where('payment_id', $payment->id)
@@ -44,6 +48,7 @@ class OwnerPaymentController extends Controller
             return [
                 'sale' => $sale,
                 'payment' => $payment,
+                'items' => DB::table('sale_items')->where('sale_id', $sale->id)->get(),
                 'attempt' => $attempt,
                 'expiresAtIso' => $expiresAt?->toIso8601String(),
                 'expired' => $expired,
@@ -56,6 +61,14 @@ class OwnerPaymentController extends Controller
             'sandboxEnabled' => (bool) config('services.qris.sandbox_enabled'),
             'qrisSvg' => $data['active'] && config('services.qris.sandbox_enabled')
                 ? $renderer->svg((string) $data['attempt']->qris_payload)
+                : null,
+            'paymentMethods' => DemoPaymentMethods::LABELS,
+            'virtualAccountNumber' => str_starts_with($data['payment']->payment_method, 'va_')
+                ? DemoPaymentMethods::virtualAccountNumber(
+                    (string) $tenant->getTenantKey(),
+                    $invoice,
+                    $data['payment']->payment_method,
+                )
                 : null,
             ...$data,
         ]);
@@ -87,8 +100,18 @@ class OwnerPaymentController extends Controller
     {
         $tenant = $this->currentTenant();
         $tenant->run(function () use ($invoice, $paymentService): void {
-            $payment = $this->qrisPaymentForInvoice($invoice);
-            $paymentService->simulateSandboxPayment((int) $payment->id);
+            $payment = $this->paymentForInvoice($invoice);
+            if ($payment->payment_method === 'qris') {
+                $paymentService->simulateSandboxPayment((int) $payment->id, (int) auth()->id());
+
+                return;
+            }
+
+            $paymentService->simulateDemoPayment(
+                (int) $payment->id,
+                (string) $payment->payment_method,
+                actorUserId: (int) auth()->id(),
+            );
         });
 
         return redirect()
@@ -100,13 +123,13 @@ class OwnerPaymentController extends Controller
     {
         $tenant = $this->currentTenant();
         $tenant->run(function () use ($request, $invoice, $paymentService): void {
-            $payment = $this->qrisPaymentForInvoice($invoice);
-            $paymentService->cancelUnpaidQrisPayment((int) $payment->id, (int) $request->user()->id);
+            $payment = $this->paymentForInvoice($invoice);
+            $paymentService->cancelUnpaidPayment((int) $payment->id, (int) $request->user()->id);
         });
 
         return redirect()
             ->route('owner.kasir.payment.show', ['invoice' => $invoice])
-            ->with('success', 'Transaksi dibatalkan dan stok sparepart dikembalikan.');
+            ->with('success', 'Transaksi dibatalkan.');
     }
 
     public function status(string $invoice): JsonResponse
@@ -117,7 +140,10 @@ class OwnerPaymentController extends Controller
             abort_if($sale === null, 404);
 
             $payment = DB::table('payments')->where('sale_id', $sale->id)->first();
-            abort_if($payment === null || $payment->payment_method !== 'qris', 404);
+            abort_if(
+                $payment === null || ! in_array($payment->payment_method, DemoPaymentMethods::ONLINE_METHODS, true),
+                404,
+            );
 
             $attempt = DB::table('payment_attempts')
                 ->where('payment_id', $payment->id)
@@ -141,11 +167,22 @@ class OwnerPaymentController extends Controller
 
     private function qrisPaymentForInvoice(string $invoice): object
     {
+        $payment = $this->paymentForInvoice($invoice);
+        abort_if($payment->payment_method !== 'qris', 404);
+
+        return $payment;
+    }
+
+    private function paymentForInvoice(string $invoice): object
+    {
         $sale = DB::table('sales')->where('invoice_number', $invoice)->first();
         abort_if($sale === null, 404);
 
         $payment = DB::table('payments')->where('sale_id', $sale->id)->first();
-        abort_if($payment === null || $payment->payment_method !== 'qris', 404);
+        abort_if(
+            $payment === null || ! in_array($payment->payment_method, DemoPaymentMethods::ONLINE_METHODS, true),
+            404,
+        );
 
         return $payment;
     }

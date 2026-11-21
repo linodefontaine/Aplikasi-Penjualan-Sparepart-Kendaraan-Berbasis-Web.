@@ -4,6 +4,7 @@ namespace App\Modules\Customer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,20 +17,57 @@ class CustomerBookingController extends Controller
 {
     public function show(Request $request, string $id): View
     {
-        $tenant = Tenant::query()->findOrFail($id);
+        $tenant = Tenant::query()->with(['domains', 'owner'])->findOrFail($id);
         abort_unless($tenant->isActive(), 404);
 
-        $services = $tenant->run(fn () => DB::table('service_catalog')
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'description', 'price']));
+        $data = $tenant->run(function (): array {
+            $reservedParts = DB::table('sale_items')
+                ->join('sales', 'sales.id', '=', 'sale_items.sale_id')
+                ->join('customers', 'customers.id', '=', 'sales.customer_id')
+                ->where('sales.status', 'pending')
+                ->whereNotNull('sales.fulfillment_method')
+                ->whereNotNull('customers.central_user_id')
+                ->select('sale_items.spare_part_id')
+                ->selectRaw('SUM(sale_items.quantity) as reserved_quantity')
+                ->groupBy('sale_items.spare_part_id');
 
-        $vehicles = DB::table('customer_vehicles')
-            ->where('user_id', $request->user()->id)
-            ->orderBy('id')
-            ->get();
+            return [
+                'services' => DB::table('service_catalog')
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'description', 'price']),
+                'parts' => DB::table('spare_parts')
+                    ->leftJoinSub($reservedParts, 'reserved_parts', function (Builder $join): void {
+                        $join->on('reserved_parts.spare_part_id', '=', 'spare_parts.id');
+                    })
+                    ->where('spare_parts.is_active', true)
+                    ->whereRaw('spare_parts.stock > COALESCE(reserved_parts.reserved_quantity, 0)')
+                    ->orderBy('spare_parts.name')
+                    ->limit(6)
+                    ->select([
+                        'spare_parts.id',
+                        'spare_parts.sku',
+                        'spare_parts.name',
+                        'spare_parts.price',
+                    ])
+                    ->selectRaw('(spare_parts.stock - COALESCE(reserved_parts.reserved_quantity, 0)) as available_stock')
+                    ->get(),
+            ];
+        });
 
-        return view('bengkel.detail', compact('tenant', 'services', 'vehicles'));
+        $vehicles = $request->user() === null
+            ? collect()
+            : DB::table('customer_vehicles')
+                ->where('user_id', $request->user()->id)
+                ->orderBy('id')
+                ->get();
+
+        return view('bengkel.detail', [
+            'tenant' => $tenant,
+            'services' => $data['services'],
+            'parts' => $data['parts'],
+            'vehicles' => $vehicles,
+        ]);
     }
 
     public function store(Request $request, string $id): RedirectResponse

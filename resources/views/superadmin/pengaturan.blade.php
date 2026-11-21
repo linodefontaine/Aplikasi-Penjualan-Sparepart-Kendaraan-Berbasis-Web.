@@ -14,7 +14,7 @@
         <div>
             <!-- Brand / Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-800 space-x-3">
-                <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -24,23 +24,23 @@
 
             <!-- Menu Sidebar -->
             <nav class="p-4 space-y-1.5 text-xs">
-                <a href="/superadmin/dashboard" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-dashboard') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/dashboard" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.home') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📊</span>
                     <span>Dashboard Global</span>
                 </a>
-                <a href="/superadmin/tenant" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/tenant" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.tenant') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>🏢</span>
                     <span>Kelola Bengkel (Tenant)</span>
                 </a>
-                <a href="/superadmin/laporan" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-laporan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/laporan" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.laporan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>💵</span>
                     <span>Laporan Keuangan</span>
                 </a>
-                <a href="/superadmin/paket" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-paket') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/paket" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.paket') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📦</span>
                     <span>Manajemen Paket</span>
                 </a>
-                <a href="/superadmin/pengaturan" class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-pengaturan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                <a href="/superadmin/pengaturan" class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.pengaturan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>⚙️</span>
                     <span>Pengaturan Platform</span>
                 </a>
@@ -66,7 +66,7 @@
         <header class="min-h-16 h-auto bg-[#111827] border-b border-gray-800 flex flex-col justify-between gap-3 px-4 py-3 lg:flex-row lg:items-center lg:px-8">
             <span class="text-xs font-semibold text-gray-400 tracking-wide">Pengaturan Platform Global</span>
             <div class="flex items-center space-x-2 bg-[#1f2937] px-3 py-1 rounded-full border border-gray-800 text-xs">
-                <span class="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">A</span>
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">A</span>
                 <span class="text-white font-medium">Admin Platform</span>
             </div>
         </header>
@@ -76,7 +76,7 @@
             <a href="{{ route('superadmin.tenant') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Tenant</a>
             <a href="{{ route('superadmin.laporan') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Laporan</a>
             <a href="{{ route('superadmin.paket') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Paket</a>
-            <a href="{{ route('superadmin.pengaturan') }}" class="shrink-0 rounded-lg bg-[#1f2937] px-3 py-2 text-white">Pengaturan</a>
+            <a href="{{ route('superadmin.pengaturan') }}" class="shrink-0 rounded-lg bg-emerald-500/10 px-3 py-2 text-emerald-300 ring-1 ring-emerald-500/30">Pengaturan</a>
         </nav>
 
         <!-- Area Konten Utama -->
@@ -97,22 +97,22 @@
                     <div class="space-y-3">
                         <div>
                             <label class="block text-[11px] font-medium text-gray-400 mb-1">Nama Aplikasi / Brand</label>
-                            <input type="text" value="AMAHAY - Sistem Manajemen Bengkel" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" value="AMAHAY - Sistem Manajemen Bengkel" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-medium text-gray-400 mb-1">Email Kontak Dukungan (B2B)</label>
-                            <input type="email" value="support@amahay.com" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <input type="email" value="support@amahay.com" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-medium text-gray-400 mb-1">Zona Waktu / Region Server</label>
-                            <input type="text" value="Asia/Jakarta (WIB)" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" value="Asia/Jakarta (WIB)" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                         </div>
 
                         <div>
                             <label class="block text-[11px] font-medium text-gray-400 mb-1">Mata Uang Default</label>
-                            <input type="text" value="IDR (Rupiah - Rp)" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                            <input type="text" value="IDR (Rupiah - Rp)" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                         </div>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" checked class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+                                    <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
                                 </label>
                             </div>
 
@@ -158,11 +158,11 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="block text-[11px] font-medium text-gray-400 mb-1">Midtrans Server Key (Billing & Langganan)</label>
-                                <input type="password" value="SB-Mid-server-xxxxxxxxx" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500">
+                                <input type="password" value="SB-Mid-server-xxxxxxxxx" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-medium text-gray-400 mb-1">Webhook Gateway URL Notifikasi</label>
-                                <input type="text" value="https://api.amahay.com/v1/webhook/payment" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white font-mono focus:outline-none focus:border-blue-500">
+                                <input type="text" value="https://api.amahay.com/v1/webhook/payment" class="w-full bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500">
                             </div>
                         </div>
                     </div>
@@ -173,7 +173,7 @@
 
             <!-- Tombol Aksi Simpan Bawah -->
             <div class="flex justify-end pt-2">
-                <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-6 py-2.5 rounded-xl shadow transition">
+                <button class="bg-emerald-600 hover:bg-emerald-600 text-white text-xs font-medium px-6 py-2.5 rounded-xl shadow transition">
                     Simpan Perubahan Konfigurasi
                 </button>
             </div>

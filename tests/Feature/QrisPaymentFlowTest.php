@@ -99,6 +99,53 @@ class QrisPaymentFlowTest extends TestCase
         }
     }
 
+    public function test_virtual_account_pos_checkout_stays_unpaid_until_simulation(): void
+    {
+        $records = $this->createCashierTenant('509');
+        $tenant = $records['tenant'];
+        $cashier = $records['cashier'];
+
+        try {
+            $partId = $this->createPart($tenant);
+            $this->actingAs($cashier)
+                ->post(route('owner.kasir.checkout'), [
+                    'checkout_idempotency_key' => 'be0bf9cc-9bb4-4b79-9f7f-3b4df9c23a41',
+                    'payment_method' => 'va_bri',
+                    'parts' => [$partId],
+                    'part_quantities' => [$partId => 1],
+                ])
+                ->assertRedirect(route('owner.kasir.payment.show', ['invoice' => $this->invoiceFor($tenant)]));
+
+            $sale = $this->saleFor($tenant);
+            $this->assertSame('pending', $sale->status);
+            $this->get(route('owner.kasir.payment.show', ['invoice' => $sale->invoice_number]))
+                ->assertOk()
+                ->assertSee('Virtual Account BRI')
+                ->assertSee('Simulasikan pembayaran berhasil')
+                ->assertSee('virtual-account-number');
+
+            $this->post(route('owner.kasir.payment.simulate', ['invoice' => $sale->invoice_number]))
+                ->assertRedirect(route('owner.kasir.payment.show', ['invoice' => $sale->invoice_number]));
+
+            $tenant->run(function () use ($sale, $partId): void {
+                $this->assertDatabaseHas('sales', [
+                    'id' => $sale->id,
+                    'status' => 'completed',
+                    'amount_paid' => 50000,
+                ]);
+                $this->assertDatabaseHas('payments', [
+                    'sale_id' => $sale->id,
+                    'payment_method' => 'va_bri',
+                    'status' => 'completed',
+                ]);
+                $this->assertDatabaseHas('spare_parts', ['id' => $partId, 'stock' => 2]);
+                $this->assertDatabaseCount('inventory_movements', 1);
+            });
+        } finally {
+            $this->deleteTenant($tenant);
+        }
+    }
+
     public function test_replaying_checkout_is_idempotent_and_changed_payload_is_rejected(): void
     {
         $records = $this->createCashierTenant('502');
@@ -249,6 +296,40 @@ class QrisPaymentFlowTest extends TestCase
         }
     }
 
+    public function test_cancelling_unpaid_virtual_account_restores_pos_stock(): void
+    {
+        $records = $this->createCashierTenant('510');
+        $tenant = $records['tenant'];
+        $cashier = $records['cashier'];
+
+        try {
+            $partId = $this->createPart($tenant);
+            $this->actingAs($cashier)->post(route('owner.kasir.checkout'), [
+                'checkout_idempotency_key' => '5ae7f956-ea14-46ea-b426-4f6677fca513',
+                'payment_method' => 'va_bca',
+                'parts' => [$partId],
+                'part_quantities' => [$partId => 1],
+            ]);
+            $invoice = $this->invoiceFor($tenant);
+
+            $this->post(route('owner.kasir.payment.cancel', ['invoice' => $invoice]))
+                ->assertRedirect(route('owner.kasir.payment.show', ['invoice' => $invoice]))
+                ->assertSessionHas('success');
+
+            $tenant->run(function () use ($invoice, $partId): void {
+                $sale = DB::table('sales')->where('invoice_number', $invoice)->first();
+                $payment = DB::table('payments')->where('sale_id', $sale->id)->first();
+
+                $this->assertSame('cancelled', $sale->status);
+                $this->assertSame('cancelled', $payment->status);
+                $this->assertDatabaseHas('spare_parts', ['id' => $partId, 'stock' => 3]);
+                $this->assertDatabaseCount('inventory_movements', 2);
+            });
+        } finally {
+            $this->deleteTenant($tenant);
+        }
+    }
+
     public function test_invoice_from_another_tenant_is_not_visible_on_payment_routes(): void
     {
         $firstRecords = $this->createCashierTenant('506');
@@ -288,7 +369,7 @@ class QrisPaymentFlowTest extends TestCase
             $this->actingAs($cashier)
                 ->get(route('owner.kasir'))
                 ->assertOk()
-                ->assertSee('QRIS Sandbox')
+                ->assertSee('QRIS Demo')
                 ->assertSee('BCA')
                 ->assertSee('Mandiri');
 
@@ -326,6 +407,9 @@ class QrisPaymentFlowTest extends TestCase
      */
     private function createCashierTenant(string $suffix): array
     {
+        tenancy()->end();
+        DB::purge('tenant');
+
         $phone = '0812987'.$suffix;
         $this->post(route('register.proses'), [
             'username' => 'qrisowner'.$suffix,

@@ -13,7 +13,7 @@
                 <h1 class="text-sm font-bold text-white">Pengaturan Katalog & Pesanan</h1>
                 <p class="mt-1 text-xs text-gray-400">{{ $tenant->getAttribute('tenant_name') }}</p>
             </div>
-            <a href="{{ route('owner.home') }}" class="inline-flex w-fit rounded-lg border border-gray-700 px-3 py-2 text-xs text-gray-300 transition hover:border-blue-500 hover:text-white">Kembali ke Dashboard</a>
+            <a href="{{ route('owner.home') }}" class="inline-flex w-fit rounded-lg border border-gray-700 px-3 py-2 text-xs text-gray-300 transition hover:border-amber-500 hover:text-white">Kembali ke Dashboard</a>
         </div>
     </header>
 
@@ -36,7 +36,7 @@
                 </div>
                 <label for="address" class="block space-y-2 text-xs text-gray-300">
                     <span>Alamat lengkap</span>
-                    <textarea id="address" name="address" rows="3" maxlength="2000" required class="w-full rounded-xl border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none">{{ old('address', $tenant->getAttribute('address')) }}</textarea>
+                    <textarea id="address" name="address" rows="3" maxlength="2000" required class="w-full rounded-xl border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-amber-500 focus:outline-none">{{ old('address', $tenant->getAttribute('address')) }}</textarea>
                 </label>
             </section>
 
@@ -53,13 +53,13 @@
                         @endphp
                         <div class="space-y-3 rounded-xl border border-gray-800 bg-[#161e2e] p-4">
                             <label class="flex items-center gap-2 text-xs font-medium text-white">
-                                <input type="checkbox" name="payment_methods[]" value="{{ $key }}" @checked($isSelected) class="rounded border-gray-600 bg-gray-900 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox" name="payment_methods[]" value="{{ $key }}" @checked($isSelected) class="rounded border-gray-600 bg-gray-900 text-amber-600 focus:ring-amber-500">
                                 {{ $label }}
                             </label>
                             <label class="block space-y-1.5 text-[11px] text-gray-400">
                                 <span>Instruksi untuk konsumen</span>
                                 <textarea name="payment_instructions[{{ $key }}]" rows="2" maxlength="500" placeholder="Contoh: transfer ke rekening atas nama bengkel"
-                                    class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">{{ old("payment_instructions.{$key}", $savedMethod['instructions'] ?? '') }}</textarea>
+                                    class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">{{ old("payment_instructions.{$key}", $savedMethod['instructions'] ?? '') }}</textarea>
                             </label>
                         </div>
                     @endforeach
@@ -74,7 +74,7 @@
                 <div class="grid gap-4 md:grid-cols-3">
                     @foreach ($fulfillmentOptions as $key => $label)
                         <label class="flex items-center gap-2 rounded-xl border border-gray-800 bg-[#161e2e] p-4 text-xs text-white">
-                            <input type="checkbox" name="fulfillment_modes[]" value="{{ $key }}" @checked(in_array($key, old('fulfillment_modes', $fulfillmentModes), true)) class="rounded border-gray-600 bg-gray-900 text-blue-600 focus:ring-blue-500">
+                            <input type="checkbox" name="fulfillment_modes[]" value="{{ $key }}" @checked(in_array($key, old('fulfillment_modes', $fulfillmentModes), true)) class="rounded border-gray-600 bg-gray-900 text-amber-600 focus:ring-amber-500">
                             {{ $label }}
                         </label>
                     @endforeach
@@ -82,16 +82,16 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="block space-y-1.5 text-xs text-gray-400">
                         <span>Biaya antar bengkel (Rp)</span>
-                        <input type="number" name="fulfillment_fees[delivery]" min="0" max="100000000" step="1" value="{{ old('fulfillment_fees.delivery', $fulfillmentFees['delivery'] ?? 0) }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none">
+                        <input type="number" name="fulfillment_fees[delivery]" min="0" max="100000000" step="1" value="{{ old('fulfillment_fees.delivery', $fulfillmentFees['delivery'] ?? 0) }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-amber-500 focus:outline-none">
                     </label>
                     <label class="block space-y-1.5 text-xs text-gray-400">
                         <span>Biaya kirim paket (Rp)</span>
-                        <input type="number" name="fulfillment_fees[shipping]" min="0" max="100000000" step="1" value="{{ old('fulfillment_fees.shipping', $fulfillmentFees['shipping'] ?? 0) }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none">
+                        <input type="number" name="fulfillment_fees[shipping]" min="0" max="100000000" step="1" value="{{ old('fulfillment_fees.shipping', $fulfillmentFees['shipping'] ?? 0) }}" class="w-full rounded-lg border border-gray-700 bg-[#161e2e] px-3 py-2.5 text-xs text-white focus:border-amber-500 focus:outline-none">
                     </label>
                 </div>
             </section>
 
-            <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white transition hover:bg-blue-700 sm:w-auto">Simpan Pengaturan</button>
+            <button type="submit" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-xs font-semibold text-white transition hover:bg-amber-600 sm:w-auto">Simpan Pengaturan</button>
         </form>
     </main>
 </body>

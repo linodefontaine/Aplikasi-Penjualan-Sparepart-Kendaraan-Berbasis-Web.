@@ -16,7 +16,7 @@
             --border: rgba(148, 163, 184, 0.24);
 
             --accent: #f59e0b;
-            --accent-light: #fcd34d;
+            --accent-light: #fbbf24;
             --green: #19c37d;
             --yellow: #f4c542;
             --red: #ff5c70;
@@ -89,11 +89,11 @@
             width: 25px;
             height: 25px;
             border-radius: 6px;
-            background: linear-gradient(135deg, #fbbf24, #b45309);
+            background: linear-gradient(135deg, #fbbf24, #f97316);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1c1917;
+            color: #ffffff;
             box-shadow: 0 0 20px rgba(245, 158, 11, .25);
             flex-shrink: 0;
         }
@@ -132,7 +132,7 @@
         .nav-login {
             padding: 9px 17px;
             border-radius: 6px;
-            background: #b45309;
+            background: #f59e0b;
             color: white !important;
             font-weight: 600;
         }
@@ -166,7 +166,7 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            color: #fcd34d;
+            color: #fbbf24;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: .8px;
@@ -220,13 +220,13 @@
 
         .btn-primary {
             background: var(--accent);
-            color: #1c1917;
+            color: #ffffff;
             box-shadow: 0 7px 22px rgba(245, 158, 11, .2);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            background: #fbbf24;
+            background: #f97316;
         }
 
         .btn-outline {
@@ -306,7 +306,7 @@
         .bar {
             width: 18px;
             border-radius: 3px 3px 0 0;
-            background: linear-gradient(to top, #92400e, #fbbf24);
+            background: linear-gradient(to top, #d97706, #f97316);
             box-shadow: 0 0 14px rgba(245, 158, 11, .18);
         }
 
@@ -427,7 +427,7 @@
         }
 
         .section-label {
-            color: #fcd34d;
+            color: #fbbf24;
             font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 1.1px;
@@ -487,7 +487,7 @@
             justify-content: center;
             margin-bottom: 15px;
             background: rgba(245, 158, 11, .11);
-            color: #fbbf24;
+            color: #f59e0b;
             font-size: 14px;
             font-weight: 700;
         }
@@ -593,7 +593,7 @@
             padding: 4px 10px;
             border-radius: 20px;
             background: var(--accent);
-            color: #1c1917;
+            color: #ffffff;
             font-size: 7px;
             font-weight: 700;
             white-space: nowrap;
@@ -659,7 +659,7 @@
         .price-card.popular .price-button {
             border-color: var(--accent);
             background: var(--accent);
-            color: #1c1917;
+            color: #ffffff;
         }
 
         /* =====================================================
@@ -810,7 +810,7 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-[#0b0f19] text-gray-200 font-sans selection:bg-amber-700 selection:text-stone-950">
+<body class="bg-[#0b0f19] text-gray-200 font-sans selection:bg-amber-500 selection:text-white">
 
     <!-- =====================================================
          NAVBAR
@@ -820,7 +820,7 @@
             
             <!-- Brand Logo -->
             <a href="{{ route('home') }}" class="flex items-center space-x-2.5 group">
-                <div class="w-8 h-8 bg-amber-700 rounded-lg flex items-center justify-center shadow-lg shadow-amber-900/30 group-hover:bg-amber-600 transition">
+                <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center shadow-lg shadow-amber-950/30 group-hover:bg-amber-600 transition">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -833,7 +833,7 @@
                 <a href="#fitur" class="hover:text-white transition">Fitur</a>
                 <a href="#cara-kerja" class="hover:text-white transition">Cara Kerja</a>
                 <a href="#paket" class="hover:text-white transition">Paket</a>
-               <a href="{{ route('login') }}" class="hover:text-white transition">Cari Bengkel Publik</a>
+               <a href="{{ route('public.bengkel') }}" class="hover:text-white transition">Cari Bengkel Publik</a>
             </nav>
 
             <!-- Auth Buttons -->
@@ -841,7 +841,7 @@
                 <a href="/login" class="text-xs font-medium text-gray-300 hover:text-white px-4 py-2 transition">
                     Login
                 </a>
-                <a href="/register" class="text-xs font-medium bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-xl shadow-lg shadow-amber-900/30 transition">
+                <a href="/register" class="text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl shadow-lg shadow-amber-950/30 transition">
                     Daftar Gratis
                 </a>
             </div>
@@ -864,7 +864,7 @@
 
                 <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
                     Revolusi Digital untuk <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-300">Manajemen Bengkel Anda</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-orange-400">Manajemen Bengkel Anda</span>
                 </h1>
 
                 <p class="text-sm text-gray-400 leading-relaxed max-w-lg">
@@ -872,7 +872,7 @@
                 </p>
 
                 <div class="flex flex-wrap items-center gap-4 pt-2">
-                    <a href="/register" class="bg-amber-700 hover:bg-amber-800 text-white font-medium text-xs px-6 py-3 rounded-xl shadow-lg shadow-amber-900/30 transition">
+                    <a href="/register" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs px-6 py-3 rounded-xl shadow-lg shadow-amber-950/30 transition">
                         Mulai Sekarang
                     </a>
                     <a href="#fitur" class="bg-[#1f2937] hover:bg-gray-800 text-gray-300 border border-gray-700/80 font-medium text-xs px-6 py-3 rounded-xl transition">
@@ -890,13 +890,13 @@
 
                 <!-- Chart Bars Simulation -->
                 <div class="h-32 flex items-end justify-between gap-2 px-2 bg-[#1f2937]/50 rounded-xl p-4 mb-4 border border-gray-700/50">
-                    <div class="w-full bg-amber-400/40 hover:bg-amber-800 h-[40%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/60 hover:bg-amber-800 h-[65%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/50 hover:bg-amber-800 h-[50%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/80 hover:bg-amber-800 h-[80%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/60 hover:bg-amber-800 h-[60%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/90 hover:bg-amber-800 h-[95%] rounded-t transition"></div>
-                    <div class="w-full bg-amber-400/70 hover:bg-amber-800 h-[70%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/40 hover:bg-amber-600 h-[40%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/60 hover:bg-amber-600 h-[65%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/50 hover:bg-amber-600 h-[50%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/80 hover:bg-amber-600 h-[80%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/60 hover:bg-amber-600 h-[60%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/90 hover:bg-amber-600 h-[95%] rounded-t transition"></div>
+                    <div class="w-full bg-amber-400/70 hover:bg-amber-600 h-[70%] rounded-t transition"></div>
                 </div>
 
                 <!-- Mini Stats Grid -->
@@ -1060,14 +1060,14 @@
                                 <li>✓ Laporan dasar</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-800 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
+                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-600 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
                             Pilih Paket
                         </a>
                     </div>
 
                     <!-- Professional (Popular) -->
-                    <div class="bg-[#111827] border-2 border-amber-400 p-8 rounded-3xl flex flex-col justify-between relative shadow-xl shadow-amber-900/20">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-700 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    <div class="bg-[#111827] border-2 border-amber-400 p-8 rounded-3xl flex flex-col justify-between relative shadow-xl shadow-amber-950/20">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                             Paling Populer
                         </div>
                         <div class="space-y-4 pt-2">
@@ -1082,7 +1082,7 @@
                                 <li>✓ Pengingat servis</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-amber-700 hover:bg-amber-800 text-white font-medium py-3 rounded-xl text-xs transition shadow-lg shadow-amber-900/30">
+                        <a href="/register" class="mt-8 block text-center bg-amber-500 hover:bg-amber-600 text-white font-medium py-3 rounded-xl text-xs transition shadow-lg shadow-amber-950/30">
                             Pilih Paket
                         </a>
                     </div>
@@ -1100,7 +1100,7 @@
                                 <li>✓ Laporan bisnis</li>
                             </ul>
                         </div>
-                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-800 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
+                        <a href="/register" class="mt-8 block text-center bg-[#1f2937] hover:bg-amber-600 hover:text-white text-gray-300 font-medium py-3 rounded-xl text-xs transition border border-gray-700/50">
                             Pilih Paket
                         </a>
                     </div>
@@ -1119,7 +1119,7 @@
                 <h2 class="text-xl md:text-2xl font-bold text-white">Siap Mengelola Bengkel Lebih Mudah?</h2>
                 <p class="text-xs text-gray-400 max-w-md mx-auto">Mulai gunakan AMAHAY untuk membantu mengelola operasional bengkel Anda.</p>
                 <div class="pt-2">
-                    <a href="/register" class="inline-block bg-amber-700 hover:bg-amber-800 text-white font-medium text-xs px-8 py-3 rounded-xl shadow-lg shadow-amber-900/30 transition">
+                    <a href="/register" class="inline-block bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs px-8 py-3 rounded-xl shadow-lg shadow-amber-950/30 transition">
                         Mulai Sekarang
                     </a>
                 </div>

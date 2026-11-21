@@ -16,7 +16,7 @@
         <div>
             <!-- Brand / Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-700 space-x-3">
-                <div class="w-7 h-7 bg-amber-700 rounded-lg flex items-center justify-center shadow-md">
+                <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -30,27 +30,27 @@
             <!-- Menu Sidebar (5 Fitur Super Admin) -->
             <nav class="p-4 space-y-1.5 text-xs">
                 <a href="/superadmin/dashboard"
-                    class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-dashboard') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                    class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.home') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📊</span>
                     <span>Dashboard Global</span>
                 </a>
                 <a href="/superadmin/tenant"
-                    class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                    class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.tenant') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>🏢</span>
                     <span>Kelola Bengkel (Tenant)</span>
                 </a>
                 <a href="/superadmin/laporan"
-                    class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-laporan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                    class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.laporan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>💵</span>
                     <span>Laporan Keuangan</span>
                 </a>
                 <a href="/superadmin/paket"
-                    class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-paket') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                    class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.paket') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>📦</span>
                     <span>Manajemen Paket</span>
                 </a>
                 <a href="/superadmin/pengaturan"
-                    class="flex items-center space-x-3 px-4 py-2.5 {{ Request::is('test-superadmin-pengaturan') ? 'bg-[#1f2937] text-white font-medium shadow-sm border border-gray-700/50' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
+                    class="flex items-center space-x-3 px-4 py-2.5 {{ request()->routeIs('superadmin.pengaturan') ? 'bg-emerald-500/10 text-emerald-300 font-medium shadow-sm border border-emerald-500/30' : 'text-gray-400 hover:bg-[#1f2937] hover:text-white transition' }}">
                     <span>⚙️</span>
                     <span>Pengaturan Platform</span>
                 </a>
@@ -78,21 +78,21 @@
             <h1 class="text-xs font-semibold text-gray-300 tracking-wide uppercase">Manajemen Tenant</h1>
             <div
                 class="flex shrink-0 items-center space-x-2 bg-[#1f2937] px-3 py-1.5 rounded-full border border-gray-700 text-xs">
-                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                <a href="{{ route('superadmin.profile.edit') }}" class="text-white font-medium hover:text-amber-200">{{ auth()->user()->name }}</a>
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <a href="{{ route('superadmin.profile.edit') }}" class="text-white font-medium hover:text-emerald-200">{{ auth()->user()->name }}</a>
             </div>
         </header>
 
         <nav class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-700 bg-[#111827] px-4 py-3 text-xs text-gray-400">
             <a href="{{ route('superadmin.home') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Dashboard</a>
-            <a href="{{ route('superadmin.tenant') }}" class="shrink-0 rounded-lg bg-[#1f2937] px-3 py-2 text-white">Tenant</a>
+            <a href="{{ route('superadmin.tenant') }}" class="shrink-0 rounded-lg bg-emerald-500/10 px-3 py-2 text-emerald-300 ring-1 ring-emerald-500/30">Tenant</a>
             <a href="{{ route('superadmin.laporan') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Laporan</a>
             <a href="{{ route('superadmin.paket') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Paket</a>
             <a href="{{ route('superadmin.pengaturan') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Pengaturan</a>
         </nav>
 
         @if (session('success'))
-            <div class="mx-4 mt-4 rounded-xl border border-green-800 bg-green-950/40 px-4 py-3 text-xs text-green-300 sm:mx-6 lg:mx-8">
+            <div class="mx-4 mt-4 rounded-xl border border-emerald-700 bg-emerald-950/40 px-4 py-3 text-xs text-emerald-300 sm:mx-6 lg:mx-8">
                 {{ session('success') }}
             </div>
         @endif
@@ -111,7 +111,7 @@
                     <p class="text-xs text-gray-400 mt-0.5">Kelola daftar tenant yang terdaftar pada platform.</p>
                 </div>
                 <a href="{{ route('register') }}"
-                    class="inline-flex w-fit items-center bg-amber-700 hover:bg-amber-800 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">
+                    class="inline-flex w-fit items-center bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">
                     + Daftarkan Bengkel Baru
                 </a>
             </div>
@@ -135,7 +135,7 @@
                                 [$statusLabel, $statusClass] = match ($status) {
                                     'inactive' => ['NONAKTIF', 'border-yellow-500/30 bg-yellow-500/20 text-yellow-300'],
                                     'banned' => ['DIBLOKIR', 'border-red-500/30 bg-red-500/20 text-red-300'],
-                                    default => ['AKTIF', 'border-green-500/30 bg-green-500/20 text-green-400'],
+                                    default => ['AKTIF', 'border-emerald-500/30 bg-emerald-500/20 text-emerald-400'],
                                 };
                             @endphp
                             <tr class="hover:bg-[#1f2937]/50 transition">
@@ -158,7 +158,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <details class="min-w-52">
-                                        <summary class="cursor-pointer text-xs font-medium text-amber-300 hover:text-amber-200">Kelola tenant</summary>
+                                        <summary class="cursor-pointer text-xs font-medium text-emerald-300 hover:text-emerald-200">Kelola tenant</summary>
                                         <div class="mt-3 space-y-3">
                                             <form action="{{ route('superadmin.tenant.status', $tenant) }}" method="POST" class="space-y-2">
                                                 @csrf
@@ -170,7 +170,7 @@
                                                     <option value="banned" @selected($status === 'banned')>Blokir</option>
                                                 </select>
                                                 <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-2 py-2 text-[11px] text-white placeholder-gray-500">
-                                                <button type="submit" class="w-full rounded-lg bg-amber-700 px-3 py-2 text-[11px] font-medium text-white hover:bg-amber-800">Simpan status</button>
+                                                <button type="submit" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-[11px] font-medium text-white hover:bg-emerald-700">Simpan status</button>
                                             </form>
                                             <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-700 pt-3">
                                                 @csrf
@@ -201,7 +201,7 @@
                         [$statusLabel, $statusClass] = match ($status) {
                             'inactive' => ['NONAKTIF', 'border-yellow-500/30 bg-yellow-500/20 text-yellow-300'],
                             'banned' => ['DIBLOKIR', 'border-red-500/30 bg-red-500/20 text-red-300'],
-                            default => ['AKTIF', 'border-green-500/30 bg-green-500/20 text-green-400'],
+                            default => ['AKTIF', 'border-emerald-500/30 bg-emerald-500/20 text-emerald-400'],
                         };
                     @endphp
                     <article class="rounded-2xl border border-gray-700 bg-[#111827] p-5 shadow-lg">
@@ -233,7 +233,7 @@
                             </div>
                         </dl>
                         <details class="mt-5 border-t border-gray-700 pt-4">
-                            <summary class="cursor-pointer text-xs font-medium text-amber-300">Tindakan moderator</summary>
+                            <summary class="cursor-pointer text-xs font-medium text-emerald-300">Tindakan moderator</summary>
                             <div class="mt-3 space-y-3">
                                 <form action="{{ route('superadmin.tenant.status', $tenant) }}" method="POST" class="space-y-2">
                                     @csrf
@@ -244,7 +244,7 @@
                                         <option value="banned" @selected($status === 'banned')>Blokir</option>
                                     </select>
                                     <input type="text" name="status_reason" maxlength="500" placeholder="Alasan (opsional)" value="{{ $tenant->getAttribute('status_reason') }}" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2 text-xs text-white placeholder-gray-500">
-                                    <button type="submit" class="w-full rounded-lg bg-amber-700 px-3 py-2 text-xs font-medium text-white hover:bg-amber-800">Simpan status</button>
+                                    <button type="submit" class="w-full rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700">Simpan status</button>
                                 </form>
                                 <form action="{{ route('superadmin.tenant.destroy', $tenant) }}" method="POST" class="space-y-2 border-t border-gray-700 pt-3">
                                     @csrf
