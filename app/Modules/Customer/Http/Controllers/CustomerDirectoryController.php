@@ -4,40 +4,28 @@ namespace App\Modules\Customer\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Builder;
+use App\Modules\Customer\Services\CustomerDirectoryService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CustomerDirectoryController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, CustomerDirectoryService $directory): View
     {
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
+            'filter' => ['nullable', Rule::in(array_keys(CustomerDirectoryService::FILTER_LABELS))],
         ]);
         $search = trim($validated['search'] ?? '');
+        $filter = $validated['filter'] ?? '';
 
-        $tenants = Tenant::query()
-            ->where(function (Builder $query): void {
-                $query->whereNull('data->status')
-                    ->orWhere('data->status', 'active');
-            })
-            ->with(['domains', 'owner'])
-            ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('data->tenant_name', 'like', "%{$search}%")
-                        ->orWhereHas('domains', function (Builder $domainQuery) use ($search): void {
-                            $domainQuery->where('domain', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->latest()
-            ->paginate(12)
-            ->withQueryString();
-        $accountTenant = $request->user()->tenant_id === null
+        $tenants = $directory->search($request, $search, $filter);
+        $accountTenant = $request->user()?->tenant_id === null
             ? null
             : Tenant::query()->find($request->user()->tenant_id);
+        $filterLabels = CustomerDirectoryService::FILTER_LABELS;
 
-        return view('bengkel.user-menu', compact('tenants', 'search', 'accountTenant'));
+        return view('bengkel.user-menu', compact('tenants', 'search', 'filter', 'filterLabels', 'accountTenant'));
     }
 }

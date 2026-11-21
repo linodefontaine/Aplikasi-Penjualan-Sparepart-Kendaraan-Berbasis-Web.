@@ -14,7 +14,7 @@
         <div>
             <!-- Brand / Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-700 space-x-3">
-                <div class="w-7 h-7 bg-amber-700 rounded-lg flex items-center justify-center shadow-md">
+                <div class="w-7 h-7 bg-amber-600 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -27,7 +27,7 @@
 
             <!-- Menu Sidebar -->
             <nav class="p-4 space-y-1.5 text-xs">
-                <a href="/owner/dashboard" class="flex items-center space-x-3 px-4 py-2.5 bg-[#1f2937] text-white rounded-xl font-medium shadow-sm border border-gray-700/50">
+                <a href="/owner/dashboard" class="flex items-center space-x-3 px-4 py-2.5 bg-amber-500/10 text-amber-300 rounded-xl font-medium shadow-sm border border-amber-500/30">
                     <span>📊</span>
                     <span>Dashboard</span>
                 </a>
@@ -52,7 +52,7 @@
                     <span>Pengingat Service</span>
                 </a>
                 @if (auth()->user()->role === 'Owner')
-                    <a href="{{ route('owner.subscription') }}" class="flex items-center space-x-3 rounded-xl px-4 py-2.5 text-gray-400 transition hover:bg-[#1f2937] hover:text-white {{ request()->routeIs('owner.subscription') ? 'bg-[#1f2937] text-white' : '' }}">
+                    <a href="{{ route('owner.subscription') }}" class="flex items-center space-x-3 rounded-xl px-4 py-2.5 text-gray-400 transition hover:bg-[#1f2937] hover:text-white {{ request()->routeIs('owner.subscription') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : '' }}">
                         <span>🧾</span>
                         <span>Langganan &amp; Tagihan</span>
                     </a>
@@ -63,7 +63,7 @@
         <!-- Profil Owner / Mekanik di Sidebar Bawah & Tombol Logout -->
         <div class="p-4 border-t border-gray-700 space-y-3">
             <div class="flex items-center space-x-3 bg-[#1f2937] p-2.5 rounded-xl border border-gray-700">
-                <div class="w-8 h-8 rounded-lg bg-amber-700 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                <div class="w-8 h-8 rounded-lg bg-amber-600 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
                 <div class="text-xs">
                     <p class="font-bold text-white">{{ auth()->user()->name }}</p>
                     <p class="text-[10px] text-gray-400">{{ auth()->user()->role }}</p>
@@ -104,14 +104,14 @@
         </header>
 
         <nav aria-label="Navigasi tenant" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-700 bg-[#111827] px-4 py-3 text-xs text-gray-400">
-            <a href="{{ route('owner.home') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.home') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Dashboard</a>
-            <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
-            <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
-            <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
-            <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
-            <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
+            <a href="{{ route('owner.home') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.home') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Dashboard</a>
+            <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
+            <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
+            <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
+            <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
+            <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
             @if (auth()->user()->role === 'Owner')
-                <a href="{{ route('owner.subscription') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.subscription') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Langganan &amp; Tagihan</a>
+                <a href="{{ route('owner.subscription') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.subscription') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Langganan &amp; Tagihan</a>
             @endif
             <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Akun Utama</a>
         </nav>
@@ -183,7 +183,7 @@
                             <h4 class="text-xs font-bold text-white">Pengingat Servis Otomatis</h4>
                             <p class="text-[9px] text-gray-400">Jadwal ganti oli/sparepart berkala</p>
                         </div>
-                        <span class="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-bold">{{ $pendingRemindersCount }} Perlu Tindakan</span>
+                        <span class="text-[9px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">{{ $pendingRemindersCount }} Perlu Tindakan</span>
                     </div>
 
                     <div class="space-y-3 text-xs">
@@ -282,7 +282,7 @@
                                         (Min: {{ $part->minimum_stock }})
                                     </p>
                                 </div>
-                                <a href="{{ route('owner.stok') }}" class="shrink-0 bg-amber-700 hover:bg-amber-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow">Kelola Stok</a>
+                                <a href="{{ route('owner.stok') }}" class="shrink-0 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow">Kelola Stok</a>
                             </div>
                         @empty
                             <p class="py-4 text-center text-[10px] text-gray-400">Tidak ada sparepart yang berada di bawah stok minimum.</p>

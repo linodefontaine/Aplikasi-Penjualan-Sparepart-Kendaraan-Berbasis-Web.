@@ -14,7 +14,7 @@
         <div>
             <!-- Brand / Logo -->
             <div class="h-16 flex items-center px-6 border-b border-gray-800 space-x-3">
-                <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                <div class="w-7 h-7 bg-amber-600 rounded-lg flex items-center justify-center shadow-md">
                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.9 6.9a2.12 2.12 0 1 1-3-3l6.9-6.9a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                     </svg>
@@ -47,7 +47,7 @@
                     <span>👥</span>
                     <span>Pelanggan & Mekanik</span>
                 </a>
-                <a href="/owner/pengingat" class="flex items-center space-x-3 px-4 py-2.5 bg-[#1f2937] text-white rounded-xl font-medium shadow-sm border border-gray-700/50">
+                <a href="/owner/pengingat" class="flex items-center space-x-3 px-4 py-2.5 bg-amber-500/10 text-amber-300 rounded-xl font-medium shadow-sm border border-amber-500/30">
                     <span>🔔</span>
                     <span>Pengingat Service</span>
                 </a>
@@ -56,7 +56,7 @@
 
         <div class="p-4 border-t border-gray-800">
             <div class="flex items-center space-x-3 bg-[#161e2e] p-2.5 rounded-xl border border-gray-800">
-                <div class="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
+                <div class="w-8 h-8 rounded-lg bg-amber-600 text-white font-bold flex items-center justify-center text-xs">{{ strtoupper(substr(auth()->user()->name, 0, 2)) }}</div>
                 <div class="text-xs">
                     <p class="font-bold text-white">{{ auth()->user()->name }}</p>
                     <p class="text-[10px] text-gray-400">{{ auth()->user()->role }}</p>
@@ -77,7 +77,7 @@
             <div class="flex items-center space-x-3">
                 @if (auth()->user()->role === 'Owner')
                     <details class="relative">
-                        <summary class="list-none cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">+ Buat Pengingat Baru</summary>
+                        <summary class="list-none cursor-pointer bg-amber-600 hover:bg-amber-600 text-white text-xs font-medium px-4 py-2 rounded-xl shadow transition">+ Buat Pengingat Baru</summary>
                         <form method="POST" action="{{ route('owner.pengingat.store') }}" class="absolute right-0 z-30 mt-2 grid w-80 max-w-[90vw] gap-3 rounded-xl border border-gray-700 bg-[#111827] p-4 shadow-xl">
                             @csrf
                             <h2 class="text-xs font-bold text-white">Jadwal pengingat servis</h2>
@@ -98,7 +98,7 @@
                             @if ($errors->any())
                                 <p class="text-xs text-red-400">{{ $errors->first() }}</p>
                             @endif
-                            <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">Simpan jadwal</button>
+                            <button type="submit" class="rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-600">Simpan jadwal</button>
                         </form>
                     </details>
                 @endif
@@ -106,12 +106,12 @@
         </header>
 
         <nav aria-label="Navigasi tenant" class="md:hidden flex items-center gap-2 overflow-x-auto border-b border-gray-800 bg-[#111827] px-4 py-3 text-xs text-gray-400">
-            <a href="{{ route('owner.home') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.home') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Dashboard</a>
-            <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
-            <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
-            <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
-            <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
-            <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-[#1f2937] text-white' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
+            <a href="{{ route('owner.home') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.home') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Dashboard</a>
+            <a href="{{ route('owner.antrean') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.antrean') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Antrean</a>
+            <a href="{{ route('owner.kasir') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.kasir') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Kasir</a>
+            <a href="{{ route('owner.stok') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.stok') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Stok</a>
+            <a href="{{ route('owner.mekanik') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.mekanik') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Pelanggan & Mekanik</a>
+            <a href="{{ route('owner.pengingat') }}" class="shrink-0 rounded-lg px-3 py-2 {{ request()->routeIs('owner.pengingat') ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30' : 'hover:bg-[#1f2937] hover:text-white' }}">Pengingat</a>
             <a href="{{ route('user.menu') }}" class="shrink-0 rounded-lg px-3 py-2 hover:bg-[#1f2937] hover:text-white">Akun Utama</a>
         </nav>
 

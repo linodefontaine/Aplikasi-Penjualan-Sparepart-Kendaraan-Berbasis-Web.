@@ -77,7 +77,21 @@ class CustomerServiceController extends Controller
                         ->join('vehicles', 'vehicles.id', '=', 'work_orders.vehicle_id')
                         ->leftJoin('employees', 'employees.id', '=', 'work_orders.mechanic_id')
                         ->whereIn('work_orders.customer_id', $customerIds)
-                        ->when($activeOnly, fn (Builder $query) => $query->whereIn('work_orders.status', ['waiting', 'in_progress']))
+                        ->when($activeOnly, function (Builder $query) use ($user): void {
+                            $query->where(function (Builder $query) use ($user): void {
+                                $query->whereIn('work_orders.status', ['waiting', 'in_progress'])
+                                    ->orWhereExists(function (Builder $subQuery) use ($user): void {
+                                        $subQuery->selectRaw('1')
+                                            ->from('sales')
+                                            ->join('payments', 'payments.sale_id', '=', 'sales.id')
+                                            ->join('customers as sale_customers', 'sale_customers.id', '=', 'sales.customer_id')
+                                            ->whereColumn('sales.work_order_id', 'work_orders.id')
+                                            ->where('sales.status', 'pending')
+                                            ->where('payments.status', 'pending')
+                                            ->where('sale_customers.central_user_id', $user->getKey());
+                                    });
+                            });
+                        })
                         ->when($search !== '', function (Builder $query) use ($search): void {
                             $query->where(function (Builder $query) use ($search): void {
                                 $query->where('work_orders.work_order_number', 'like', "%{$search}%")
@@ -104,6 +118,7 @@ class CustomerServiceController extends Controller
                     $workOrderIds = $workOrders->pluck('id');
                     $servicesByOrder = collect();
                     $salesByOrder = collect();
+                    $unpaidSalesByOrder = collect();
 
                     if ($workOrderIds->isNotEmpty()) {
                         $servicesByOrder = DB::table('work_order_services')
@@ -117,15 +132,37 @@ class CustomerServiceController extends Controller
                             ->groupBy('work_order_id')
                             ->get()
                             ->keyBy('work_order_id');
+                        $unpaidSalesByOrder = DB::table('sales')
+                            ->join('payments', 'payments.sale_id', '=', 'sales.id')
+                            ->join('customers as sale_customers', 'sale_customers.id', '=', 'sales.customer_id')
+                            ->whereIn('sales.work_order_id', $workOrderIds)
+                            ->whereIn('sales.customer_id', $customerIds)
+                            ->where('sale_customers.central_user_id', $user->getKey())
+                            ->where('sales.status', 'pending')
+                            ->where('payments.status', 'pending')
+                            ->orderBy('sales.created_at')
+                            ->get([
+                                'sales.work_order_id',
+                                'sales.invoice_number',
+                                'sales.total',
+                            ])
+                            ->groupBy('work_order_id');
                     }
 
-                    $entries = $workOrders->map(function (object $workOrder) use ($tenant, $servicesByOrder, $salesByOrder): object {
+                    $entries = $workOrders->map(function (object $workOrder) use ($tenant, $servicesByOrder, $salesByOrder, $unpaidSalesByOrder): object {
                         $services = $servicesByOrder->get($workOrder->id, collect());
                         $saleTotal = $salesByOrder->get($workOrder->id)?->total;
                         $workOrder->entry_type = 'work_order';
                         $workOrder->tenant_name = $tenant->getAttribute('tenant_name');
                         $workOrder->service_summary = $services->pluck('service_name')->join(', ');
                         $workOrder->total = $saleTotal ?? $services->sum('subtotal');
+                        $workOrder->unpaid_payments = $unpaidSalesByOrder
+                            ->get($workOrder->id, collect())
+                            ->map(fn (object $sale): object => (object) [
+                                'invoice_number' => $sale->invoice_number,
+                                'total' => $sale->total,
+                                'tenant_id' => $tenant->getTenantKey(),
+                            ]);
                         $workOrder->status_label = match ($workOrder->status) {
                             'waiting' => 'Menunggu antrean',
                             'in_progress' => 'Sedang dikerjakan',
@@ -142,24 +179,43 @@ class CustomerServiceController extends Controller
                     }
 
                     $sales = DB::table('sales')
-                        ->whereIn('customer_id', $customerIds)
-                        ->whereNull('work_order_id')
-                        ->latest('sold_at')
-                        ->latest('created_at')
+                        ->leftJoin('payments', 'payments.sale_id', '=', 'sales.id')
+                        ->leftJoin('customers as sale_customers', 'sale_customers.id', '=', 'sales.customer_id')
+                        ->whereIn('sales.customer_id', $customerIds)
+                        ->whereNull('sales.work_order_id')
+                        ->latest('sales.sold_at')
+                        ->latest('sales.created_at')
                         ->limit(50)
-                        ->get(['id', 'invoice_number', 'status', 'total', 'sold_at', 'created_at']);
+                        ->get([
+                            'sales.id',
+                            'sales.customer_id',
+                            'sales.invoice_number',
+                            'sales.status',
+                            'sales.total',
+                            'sales.sold_at',
+                            'sales.created_at',
+                            'payments.status as payment_status',
+                            'payments.payment_method',
+                            'sale_customers.central_user_id',
+                        ]);
                     $saleItems = DB::table('sale_items')
                         ->whereIn('sale_id', $sales->pluck('id'))
                         ->get(['sale_id', 'item_name'])
                         ->groupBy('sale_id');
 
-                    $transactions = $sales->map(function (object $sale) use ($tenant, $saleItems): object {
+                    $transactions = $sales->map(function (object $sale) use ($tenant, $saleItems, $user): object {
                         $sale->entry_type = 'sale';
                         $sale->tenant_name = $tenant->getAttribute('tenant_name');
+                        $sale->tenant_id = $tenant->getTenantKey();
                         $sale->work_order_number = $sale->invoice_number;
                         $sale->service_summary = $saleItems->get($sale->id, collect())->pluck('item_name')->join(', ');
                         $sale->created_at = $sale->sold_at ?? $sale->created_at;
-                        $sale->status_label = match ($sale->status) {
+                        $sale->can_pay = $sale->status === 'pending'
+                            && $sale->payment_status === 'pending'
+                            && (int) $sale->central_user_id === (int) $user->getKey();
+                        $sale->status_label = $sale->payment_status === 'completed'
+                            ? 'Lunas'
+                            : match ($sale->status) {
                             'completed' => 'Transaksi selesai',
                             'pending' => 'Menunggu pembayaran',
                             'cancelled' => 'Transaksi dibatalkan',

@@ -5,6 +5,7 @@ use App\Http\Controllers\TenantStorefrontController;
 use App\Modules\Billing\Http\Controllers\SubscriptionBillingController;
 use App\Modules\Customer\Http\Controllers\CustomerBookingController;
 use App\Modules\Customer\Http\Controllers\CustomerDirectoryController;
+use App\Modules\Customer\Http\Controllers\CustomerPaymentController;
 use App\Modules\Customer\Http\Controllers\CustomerProfileController;
 use App\Modules\Customer\Http\Controllers\CustomerServiceController;
 use App\Modules\Identity\Http\Controllers\AuthController;
@@ -81,14 +82,17 @@ Route::middleware(['auth', 'role:Pelanggan,Owner'])->prefix('user-menu')->name('
     // Halaman Menu Utama Konsumen
     Route::get('/', [CustomerDirectoryController::class, 'index'])->name('menu');
 
-    // Halaman Detail Bengkel
-    Route::get('/bengkel/{id}', [CustomerBookingController::class, 'show'])->name('bengkel.detail');
-    Route::get('/bengkel/{id}/katalog', [TenantStorefrontController::class, 'catalog'])->name('bengkel.katalog');
     Route::post('/bengkel/{id}/pesanan', [TenantStorefrontController::class, 'storeOrder'])
         ->name('bengkel.pesanan.store');
-    Route::get('/bengkel/{id}/pembayaran/{invoice}', [TenantStorefrontController::class, 'payment'])
+    Route::get('/bengkel/{id}/pembayaran/{invoice}', [CustomerPaymentController::class, 'show'])
         ->where('invoice', '[A-Za-z0-9-]+')
         ->name('bengkel.pembayaran');
+    Route::post('/bengkel/{id}/pembayaran/{invoice}/metode', [CustomerPaymentController::class, 'selectMethod'])
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('bengkel.pembayaran.metode');
+    Route::post('/bengkel/{id}/pembayaran/{invoice}/simulasi', [CustomerPaymentController::class, 'simulate'])
+        ->where('invoice', '[A-Za-z0-9-]+')
+        ->name('bengkel.pembayaran.simulasi');
     Route::post('/bengkel/{id}/booking', [CustomerBookingController::class, 'store'])->name('bengkel.booking');
 
     // Halaman Cek Servis
@@ -107,6 +111,12 @@ Route::middleware(['auth', 'role:Pelanggan,Owner'])->prefix('user-menu')->name('
     Route::patch('/profil/edit', [CustomerProfileController::class, 'update'])->name('profil.update');
 
 });
+
+Route::get('/cari-bengkel', [CustomerDirectoryController::class, 'index'])->name('public.bengkel');
+Route::get('/user-menu/bengkel/{id}', [CustomerBookingController::class, 'show'])
+    ->name('user.bengkel.detail');
+Route::get('/user-menu/bengkel/{id}/katalog', [TenantStorefrontController::class, 'catalog'])
+    ->name('user.bengkel.katalog');
 
 /*
 |--------------------------------------------------------------------------

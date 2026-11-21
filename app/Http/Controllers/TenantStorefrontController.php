@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tenant;
+use App\Modules\Workshop\Payments\DemoPaymentMethods;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,13 +16,6 @@ use Illuminate\View\View;
 
 class TenantStorefrontController extends Controller
 {
-    private const PAYMENT_LABELS = [
-        'cash' => 'Tunai saat ambil',
-        'bank_transfer' => 'Transfer bank',
-        'qris' => 'QRIS manual',
-        'e_wallet' => 'E-wallet',
-    ];
-
     private const FULFILLMENT_LABELS = [
         'pickup' => 'Ambil di bengkel',
         'delivery' => 'Diantar bengkel',
@@ -97,20 +91,14 @@ class TenantStorefrontController extends Controller
         $tenant = $this->activeTenant($id);
         $paymentMethods = $tenant->getAttribute('payment_methods') ?? [];
         $fulfillmentModes = $tenant->getAttribute('fulfillment_modes') ?? [];
-
-        if ($paymentMethods === [] || $fulfillmentModes === [] || ! $tenant->getAttribute('address')) {
-            throw ValidationException::withMessages([
-                'order' => 'Bengkel belum melengkapi alamat, metode pembayaran, dan opsi pemenuhan pesanan.',
-            ]);
-        }
-
-        $paymentKeys = array_column($paymentMethods, 'key');
+        $paymentKeys = [...DemoPaymentMethods::METHODS, 'bank_transfer'];
+        $availableFulfillmentModes = array_unique(['pickup', ...$fulfillmentModes]);
         $validated = $request->validate([
             'items' => ['required', 'array', 'min:1', 'max:40'],
             'items.*.part_id' => ['required', 'integer', 'distinct'],
             'items.*.quantity' => ['required', 'integer', 'between:1,1000'],
-            'payment_method' => ['required', Rule::in($paymentKeys)],
-            'fulfillment_method' => ['required', Rule::in($fulfillmentModes)],
+            'payment_method' => ['nullable', Rule::in($paymentKeys)],
+            'fulfillment_method' => ['nullable', Rule::in($availableFulfillmentModes)],
             'delivery_address' => [
                 Rule::requiredIf(in_array($request->input('fulfillment_method'), ['delivery', 'shipping'], true)),
                 'nullable',
@@ -124,14 +112,18 @@ class TenantStorefrontController extends Controller
             'fulfillment_method.in' => 'Cara menerima pesanan yang dipilih tidak tersedia.',
         ]);
 
-        $paymentMethod = collect($paymentMethods)->firstWhere('key', $validated['payment_method']);
-        $fulfillmentFee = (float) (($tenant->getAttribute('fulfillment_fees') ?? [])[$validated['fulfillment_method']] ?? 0);
-        $deliveryAddress = in_array($validated['fulfillment_method'], ['delivery', 'shipping'], true)
+        $paymentKey = $validated['payment_method'] ?? 'cash';
+        $paymentMethod = collect($paymentMethods)->firstWhere('key', $paymentKey);
+        $paymentLabel = $paymentMethod['label'] ?? DemoPaymentMethods::label($paymentKey);
+        $paymentInstructions = $paymentMethod['instructions'] ?? null;
+        $fulfillmentMethod = $validated['fulfillment_method'] ?? 'pickup';
+        $fulfillmentFee = (float) (($tenant->getAttribute('fulfillment_fees') ?? [])[$fulfillmentMethod] ?? 0);
+        $deliveryAddress = in_array($fulfillmentMethod, ['delivery', 'shipping'], true)
             ? ($validated['delivery_address'] ?? null)
             : null;
 
-        $invoiceNumber = $tenant->run(function () use ($validated, $request, $paymentMethod, $fulfillmentFee, $deliveryAddress): string {
-            return DB::transaction(function () use ($validated, $request, $paymentMethod, $fulfillmentFee, $deliveryAddress): string {
+        $invoiceNumber = $tenant->run(function () use ($validated, $request, $paymentKey, $paymentLabel, $paymentInstructions, $fulfillmentMethod, $fulfillmentFee, $deliveryAddress): string {
+            return DB::transaction(function () use ($validated, $request, $paymentKey, $paymentLabel, $paymentInstructions, $fulfillmentMethod, $fulfillmentFee, $deliveryAddress): string {
                 $items = collect($validated['items'])
                     ->keyBy(fn (array $item): int => (int) $item['part_id']);
                 $partIds = $items->keys()->all();
@@ -216,7 +208,7 @@ class TenantStorefrontController extends Controller
                     'total' => $total,
                     'amount_paid' => 0,
                     'change_due' => 0,
-                    'fulfillment_method' => $validated['fulfillment_method'],
+                    'fulfillment_method' => $fulfillmentMethod,
                     'delivery_address' => $deliveryAddress,
                     'fulfillment_fee' => $fulfillmentFee,
                     'notes' => $validated['customer_note'] ?? null,
@@ -241,12 +233,12 @@ class TenantStorefrontController extends Controller
 
                 DB::table('payments')->insert([
                     'sale_id' => $saleId,
-                    'payment_method' => $paymentMethod['key'],
+                    'payment_method' => $paymentKey,
                     'amount' => $total,
                     'status' => 'pending',
                     'notes' => json_encode([
-                        'label' => $paymentMethod['label'],
-                        'instructions' => $paymentMethod['instructions'],
+                        'label' => $paymentLabel,
+                        'instructions' => $paymentInstructions,
                     ], JSON_THROW_ON_ERROR),
                     'created_at' => $now,
                     'updated_at' => $now,

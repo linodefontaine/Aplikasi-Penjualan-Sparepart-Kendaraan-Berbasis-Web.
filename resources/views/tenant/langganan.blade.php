@@ -12,11 +12,11 @@
     <main class="mx-auto max-w-6xl space-y-6 p-4 sm:p-8">
         <header class="flex flex-wrap items-center justify-between gap-4">
             <div>
-                <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-400">Billing Owner</p>
+                <p class="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">Billing Owner</p>
                 <h1 class="mt-1 text-2xl font-bold text-white">Langganan &amp; Tagihan</h1>
                 <p class="mt-1 text-sm text-gray-400">{{ $tenant->getAttribute('tenant_name') }}</p>
             </div>
-            <a href="{{ route('owner.home') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-blue-500 hover:text-white">Kembali ke Dashboard</a>
+            <a href="{{ route('owner.home') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-xs font-medium text-gray-300 transition hover:border-amber-500 hover:text-white">Kembali ke Dashboard</a>
         </header>
 
         <section class="grid gap-4 sm:grid-cols-3">
@@ -60,7 +60,7 @@
                         <tbody class="divide-y divide-gray-800">
                             @foreach ($invoices as $invoice)
                                 <tr>
-                                    <td class="px-5 py-4 font-mono text-xs text-blue-300">{{ $invoice->invoice_number }}</td>
+                                    <td class="px-5 py-4 font-mono text-xs text-amber-300">{{ $invoice->invoice_number }}</td>
                                     <td class="px-5 py-4 text-white">{{ $invoice->package_name }}</td>
                                     <td class="px-5 py-4 text-white">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</td>
                                     <td class="px-5 py-4 text-gray-300">

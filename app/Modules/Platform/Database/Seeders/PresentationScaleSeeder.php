@@ -239,12 +239,16 @@ class PresentationScaleSeeder extends Seeder
             }
 
             $tenant = $this->seedWorkshopAccount($workshop, $baseDomain, $packages[$workshop['package']]);
-            $tenant->run(function () use ($workshop, $tenantIndex): void {
-                $this->seedWorkshopOperations($workshop, $tenantIndex);
+            $demoCustomerUserId = $tenantIndex === 0
+                ? $this->seedDemoCustomerUser($workshop)
+                : null;
+            $tenant->run(function () use ($workshop, $tenantIndex, $demoCustomerUserId): void {
+                $this->seedWorkshopOperations($workshop, $tenantIndex, $demoCustomerUserId);
             });
         }
 
-        $this->command?->info('Seed presentasi selesai: 5 Super Admin, 10 Owner, 10 tenant, 8 invoice lunas, dan 2 invoice menunggu pembayaran.');
+        $this->command?->info('Seed presentasi selesai: 5 Super Admin, 10 Owner, 10 tenant, 8 invoice langganan lunas, 2 invoice langganan menunggu pembayaran, dan 3 transaksi demo konsumen belum dibayar.');
+        $this->command?->info('Akun pelanggan demo: citra.lestari@gmail.com / password');
     }
 
     private function seedSuperAdmins(): void
@@ -409,9 +413,9 @@ class PresentationScaleSeeder extends Seeder
      *     transaction_count: int
      * }  $workshop
      */
-    private function seedWorkshopOperations(array $workshop, int $tenantIndex): void
+    private function seedWorkshopOperations(array $workshop, int $tenantIndex, ?int $demoCustomerUserId): void
     {
-        DB::transaction(function () use ($workshop, $tenantIndex): void {
+        DB::transaction(function () use ($workshop, $tenantIndex, $demoCustomerUserId): void {
             $code = $workshop['code'];
             $now = CarbonImmutable::now();
             $partIds = [];
@@ -486,6 +490,9 @@ class PresentationScaleSeeder extends Seeder
                     'updated_at' => $now,
                     'created_at' => $now,
                 ];
+                if ($tenantIndex === 0 && $customerIndex === 0) {
+                    $customer['central_user_id'] = $demoCustomerUserId;
+                }
                 DB::table('customers')->updateOrInsert(['phone' => $phone], $customer);
                 $customerIds[$customerIndex] = (int) DB::table('customers')->where('phone', $phone)->value('id');
 
@@ -670,7 +677,113 @@ class PresentationScaleSeeder extends Seeder
                     'updated_at' => $now,
                 ]);
             }
+
+            if ($tenantIndex === 0 && $demoCustomerUserId !== null) {
+                $this->seedUnpaidDemoTransactions(
+                    $code,
+                    $now,
+                    $customerIds[0],
+                    $employeeIds[$code.'-KSR-A'],
+                    $partIds,
+                    $parts,
+                );
+            }
         });
+    }
+
+    /**
+     * @param  array<string, int>  $partIds
+     * @param  list<array{name: string, category: string, unit: string, purchase_price: int, price: int, sku: string}>  $parts
+     */
+    private function seedUnpaidDemoTransactions(
+        string $code,
+        CarbonImmutable $now,
+        int $customerId,
+        int $cashierId,
+        array $partIds,
+        array $parts,
+    ): void {
+        $methods = ['qris', 'va_bca', 'va_bri'];
+
+        foreach (array_slice($parts, 0, count($methods)) as $index => $part) {
+            $invoiceNumber = 'DEMO-PAY-'.$code.'-'.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT);
+            $sale = [
+                'work_order_id' => null,
+                'customer_id' => $customerId,
+                'cashier_id' => $cashierId,
+                'status' => 'pending',
+                'subtotal' => $part['price'],
+                'discount' => 0,
+                'tax' => 0,
+                'total' => $part['price'],
+                'amount_paid' => 0,
+                'change_due' => 0,
+                'sold_at' => null,
+                'notes' => 'Transaksi demo menunggu pembayaran.',
+                'created_at' => $now->subMinutes(3 - $index),
+                'updated_at' => $now,
+            ];
+            DB::table('sales')->updateOrInsert(['invoice_number' => $invoiceNumber], $sale);
+            $saleId = (int) DB::table('sales')->where('invoice_number', $invoiceNumber)->value('id');
+
+            DB::table('payment_attempts')->whereIn('payment_id', function ($query) use ($saleId): void {
+                $query->select('id')->from('payments')->where('sale_id', $saleId);
+            })->delete();
+            DB::table('payments')->where('sale_id', $saleId)->delete();
+            DB::table('inventory_movements')
+                ->where('reference_type', 'sale')
+                ->where('reference_id', $saleId)
+                ->delete();
+            DB::table('sale_items')->where('sale_id', $saleId)->delete();
+            DB::table('sale_items')->insert([
+                'sale_id' => $saleId,
+                'spare_part_id' => $partIds[$part['sku']],
+                'service_id' => null,
+                'item_name' => $part['name'],
+                'sku' => $part['sku'],
+                'quantity' => 1,
+                'unit_price' => $part['price'],
+                'discount' => 0,
+                'subtotal' => $part['price'],
+                'created_at' => $sale['created_at'],
+                'updated_at' => $now,
+            ]);
+            DB::table('payments')->insert([
+                'sale_id' => $saleId,
+                'payment_method' => $methods[$index],
+                'amount' => $part['price'],
+                'status' => 'pending',
+                'reference_number' => $invoiceNumber,
+                'paid_at' => null,
+                'notes' => null,
+                'created_at' => $sale['created_at'],
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
+    /**
+     * @param  array{customers: list<string>}  $workshop
+     */
+    private function seedDemoCustomerUser(array $workshop): int
+    {
+        $name = $workshop['customers'][0];
+        $email = Str::slug($name, '.').'@gmail.com';
+        $phone = $this->operationalPhone(300000, '0813');
+
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'username' => Str::before($email, '@'),
+                'name' => $name,
+                'password' => 'password',
+                'phone' => $phone,
+                'role' => 'Pelanggan',
+                'tenant_id' => null,
+            ],
+        );
+
+        return (int) $user->getKey();
     }
 
     private function operationalPhone(int $number, string $prefix = '0812'): string

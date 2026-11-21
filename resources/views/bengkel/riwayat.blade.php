@@ -102,6 +102,17 @@
                             <span class="mt-2 text-[10px] text-gray-400">{{ $workOrder->work_order_number }}</span>
                         </div>
                     </div>
+                    @if ($workOrder->entry_type === 'sale' && $workOrder->can_pay)
+                        <a href="{{ route('user.bengkel.pembayaran', ['id' => $workOrder->tenant_id, 'invoice' => $workOrder->invoice_number]) }}" class="inline-flex w-fit rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700">Bayar Sekarang</a>
+                    @elseif ($workOrder->entry_type === 'sale' && $workOrder->payment_status === 'completed')
+                        <a href="{{ route('user.bengkel.pembayaran', ['id' => $workOrder->tenant_id, 'invoice' => $workOrder->invoice_number]) }}" class="inline-flex w-fit rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-2.5 text-xs font-semibold text-green-300 transition hover:bg-green-500/20">Lihat Struk</a>
+                    @elseif ($workOrder->entry_type === 'work_order' && $workOrder->unpaid_payments->isNotEmpty())
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($workOrder->unpaid_payments as $payment)
+                                <a href="{{ route('user.bengkel.pembayaran', ['id' => $payment->tenant_id, 'invoice' => $payment->invoice_number]) }}" class="inline-flex rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700">Bayar Sekarang · {{ $payment->invoice_number }}</a>
+                            @endforeach
+                        </div>
+                    @endif
                 @empty
                     <div class="bg-[#111827] border border-gray-800/80 rounded-2xl p-8 text-center shadow-lg">
                         <p class="text-sm font-medium text-white">Belum ada riwayat servis untuk akun Anda.</p>

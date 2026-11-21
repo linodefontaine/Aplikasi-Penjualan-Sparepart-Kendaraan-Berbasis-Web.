@@ -152,7 +152,7 @@ final class PaymentService
         return DB::table('payment_attempts')->where('id', $attemptContext['attempt_id'])->first();
     }
 
-    public function simulateSandboxPayment(int $paymentId): void
+    public function simulateSandboxPayment(int $paymentId, ?int $centralUserId = null): void
     {
         if (! config('services.qris.sandbox_enabled')) {
             abort(404);
@@ -211,6 +211,10 @@ final class PaymentService
             }
 
             $now = now();
+            $this->deductUndeductedSaleItems(
+                $sale,
+                $centralUserId ?? $this->centralUserIdForSale($sale),
+            );
             DB::table('payment_attempts')->where('id', $attempt->id)->update([
                 'status' => 'succeeded',
                 'updated_at' => $now,
@@ -238,7 +242,79 @@ final class PaymentService
         }
     }
 
-    public function cancelUnpaidQrisPayment(int $paymentId, int $centralUserId): void
+    public function simulateDemoPayment(
+        int $paymentId,
+        string $method,
+        ?int $customerUserId = null,
+        ?int $actorUserId = null,
+    ): void
+    {
+        if (! in_array($method, DemoPaymentMethods::METHODS, true) || $method === 'qris') {
+            throw ValidationException::withMessages([
+                'payment_method' => 'Metode pembayaran demo tidak valid.',
+            ]);
+        }
+
+        DB::transaction(function () use ($paymentId, $method, $customerUserId, $actorUserId): void {
+            $payment = DB::table('payments')
+                ->where('id', $paymentId)
+                ->lockForUpdate()
+                ->first();
+            abort_if($payment === null, 404);
+
+            $sale = DB::table('sales')
+                ->where('id', $payment->sale_id)
+                ->lockForUpdate()
+                ->first();
+            abort_if($sale === null, 404);
+
+            if ($payment->status === 'completed' && $sale->status === 'completed') {
+                return;
+            }
+
+            if ($payment->status !== 'pending'
+                || $sale->status !== 'pending'
+                || $payment->payment_method !== $method) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Transaksi tidak lagi menunggu pembayaran dengan metode tersebut.',
+                ]);
+            }
+
+            if ($customerUserId !== null) {
+                $customer = DB::table('customers')
+                    ->where('id', $sale->customer_id)
+                    ->where('central_user_id', $customerUserId)
+                    ->exists();
+                abort_unless($customer, 404);
+            }
+
+            if (round((float) $sale->total, 2) !== round((float) $payment->amount, 2)) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Nominal pembayaran tidak sesuai dengan total transaksi.',
+                ]);
+            }
+
+            $now = now();
+            $this->deductUndeductedSaleItems(
+                $sale,
+                $actorUserId ?? $customerUserId ?? $this->centralUserIdForSale($sale),
+            );
+            DB::table('payments')->where('id', $paymentId)->update([
+                'status' => 'completed',
+                'paid_at' => $now,
+                'updated_at' => $now,
+            ]);
+            DB::table('sales')->where('id', $sale->id)->update([
+                'status' => 'completed',
+                'amount_paid' => $payment->amount,
+                'change_due' => 0,
+                'sold_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }, attempts: 3);
+    }
+
+    public function cancelUnpaidPayment(int $paymentId, int $centralUserId): void
     {
         DB::transaction(function () use ($paymentId, $centralUserId): void {
             $payment = DB::table('payments')
@@ -257,7 +333,7 @@ final class PaymentService
                 return;
             }
 
-            if ($payment->payment_method !== 'qris'
+            if (! in_array($payment->payment_method, DemoPaymentMethods::ONLINE_METHODS, true)
                 || $payment->status !== 'pending'
                 || $sale->status !== 'pending') {
                 throw ValidationException::withMessages([
@@ -269,10 +345,24 @@ final class PaymentService
             $items = DB::table('sale_items')
                 ->where('sale_id', $sale->id)
                 ->whereNotNull('spare_part_id')
+                ->select('spare_part_id')
+                ->selectRaw('SUM(quantity) as quantity')
+                ->groupBy('spare_part_id')
                 ->orderBy('spare_part_id')
-                ->get(['spare_part_id', 'quantity']);
+                ->get();
 
             foreach ($items as $item) {
+                $deductedQuantity = (float) DB::table('inventory_movements')
+                    ->where('spare_part_id', $item->spare_part_id)
+                    ->where('movement_type', 'sale')
+                    ->where('reference_type', 'sale')
+                    ->where('reference_id', $sale->id)
+                    ->sum('quantity');
+                $quantity = min((float) $item->quantity, $deductedQuantity);
+                if ($quantity <= 0) {
+                    continue;
+                }
+
                 $part = DB::table('spare_parts')
                     ->where('id', $item->spare_part_id)
                     ->lockForUpdate()
@@ -281,7 +371,6 @@ final class PaymentService
                     continue;
                 }
 
-                $quantity = (float) $item->quantity;
                 $stockBefore = (float) $part->stock;
                 $stockAfter = $stockBefore + $quantity;
 
@@ -316,6 +405,78 @@ final class PaymentService
                 'updated_at' => $now,
             ]);
         }, attempts: 3);
+    }
+
+    private function deductUndeductedSaleItems(object $sale, ?int $centralUserId): void
+    {
+        $items = DB::table('sale_items')
+            ->where('sale_id', $sale->id)
+            ->whereNotNull('spare_part_id')
+            ->select('spare_part_id')
+            ->selectRaw('SUM(quantity) as quantity')
+            ->groupBy('spare_part_id')
+            ->orderBy('spare_part_id')
+            ->get();
+
+        foreach ($items as $item) {
+            $part = DB::table('spare_parts')
+                ->where('id', $item->spare_part_id)
+                ->lockForUpdate()
+                ->first();
+            abort_if($part === null, 404);
+
+            $recordedQuantity = (float) DB::table('inventory_movements')
+                ->where('spare_part_id', $part->id)
+                ->where('movement_type', 'sale')
+                ->where('reference_type', 'sale')
+                ->where('reference_id', $sale->id)
+                ->sum('quantity');
+            $remainingQuantity = round((float) $item->quantity - $recordedQuantity, 2);
+
+            if ($remainingQuantity <= 0) {
+                continue;
+            }
+
+            $stockBefore = (float) $part->stock;
+            if ($stockBefore < $remainingQuantity) {
+                throw ValidationException::withMessages([
+                    'payment' => "Stok {$part->name} tidak mencukupi untuk menyelesaikan pembayaran.",
+                ]);
+            }
+
+            $stockAfter = $stockBefore - $remainingQuantity;
+            $now = now();
+            DB::table('spare_parts')->where('id', $part->id)->update([
+                'stock' => $stockAfter,
+                'updated_at' => $now,
+            ]);
+            DB::table('inventory_movements')->insert([
+                'spare_part_id' => $part->id,
+                'movement_type' => 'sale',
+                'quantity' => $remainingQuantity,
+                'stock_before' => $stockBefore,
+                'stock_after' => $stockAfter,
+                'reference_type' => 'sale',
+                'reference_id' => $sale->id,
+                'central_user_id' => $centralUserId,
+                'notes' => 'Stok dikurangi saat pembayaran demo dikonfirmasi.',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
+    private function centralUserIdForSale(object $sale): ?int
+    {
+        if ($sale->customer_id === null) {
+            return null;
+        }
+
+        $centralUserId = DB::table('customers')
+            ->where('id', $sale->customer_id)
+            ->value('central_user_id');
+
+        return $centralUserId === null ? null : (int) $centralUserId;
     }
 
     /**

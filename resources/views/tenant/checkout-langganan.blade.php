@@ -63,7 +63,7 @@
                     </label>
                 </fieldset>
 
-                <button type="submit" class="w-full rounded-xl bg-amber-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-amber-900/25 transition hover:bg-amber-800">
+                <button type="submit" class="w-full rounded-xl bg-amber-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-amber-900/25 transition hover:bg-amber-700">
                     Konfirmasi / Simulasi Pembayaran Berhasil
                 </button>
                 <p class="text-center text-xs text-gray-500">Tombol ini hanya simulasi presentasi, bukan pemrosesan pembayaran sungguhan.</p>

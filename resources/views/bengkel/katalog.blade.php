@@ -39,8 +39,10 @@
         @endif
 
         @if ($parts->isNotEmpty())
-            <form method="POST" action="{{ route('user.bengkel.pesanan.store', ['id' => $tenant->getTenantKey()]) }}" class="space-y-6">
-                @csrf
+            @auth
+                <form method="POST" action="{{ route('user.bengkel.pesanan.store', ['id' => $tenant->getTenantKey()]) }}" class="space-y-6">
+                    @csrf
+            @endauth
                 <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($parts as $index => $part)
                         <article class="flex flex-col justify-between gap-4 rounded-2xl border border-gray-800 bg-[#111827] p-5 shadow-lg">
@@ -62,6 +64,7 @@
                                 @endif
                                 <p class="mt-4 text-base font-bold text-blue-400">Rp {{ number_format($part->price, 0, ',', '.') }}</p>
                             </div>
+                            @auth
                             <div class="flex items-center justify-between gap-3 border-t border-gray-800 pt-4">
                                 <label for="part-{{ $part->id }}" class="flex items-center gap-2 text-xs text-gray-300">
                                     <input id="part-{{ $part->id }}" type="checkbox" name="items[{{ $index }}][part_id]" value="{{ $part->id }}" class="catalog-part rounded border-gray-600 bg-gray-900 text-blue-600 focus:ring-blue-500">
@@ -73,47 +76,29 @@
                                         class="catalog-quantity w-20 rounded-lg border border-gray-700 bg-[#1f2937] px-2 py-1.5 text-xs text-white disabled:opacity-50">
                                 </label>
                             </div>
+                            @endauth
                         </article>
                     @endforeach
                 </section>
 
-                @if ($paymentMethods !== [] && $fulfillmentModes !== [] && $tenant->getAttribute('address'))
+            @auth
                     <section class="grid grid-cols-1 gap-4 rounded-2xl border border-gray-800 bg-[#111827] p-5 shadow-lg md:grid-cols-2 sm:p-6">
-                        <label class="block space-y-2 text-xs text-gray-300">
-                            <span>Metode pembayaran</span>
-                            <select name="payment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2.5 text-xs text-white">
-                                <option value="">Pilih metode pembayaran</option>
-                                @foreach ($paymentMethods as $method)
-                                    <option value="{{ $method['key'] }}" @selected(old('payment_method') === $method['key'])>{{ $method['label'] }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-                        <label class="block space-y-2 text-xs text-gray-300">
-                            <span>Cara menerima pesanan</span>
-                            <select id="fulfillment-method" name="fulfillment_method" required class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2.5 text-xs text-white">
-                                <option value="">Pilih cara menerima pesanan</option>
-                                @foreach ($fulfillmentModes as $mode)
-                                    <option value="{{ $mode }}" @selected(old('fulfillment_method') === $mode)>
-                                        {{ ['pickup' => 'Ambil di bengkel', 'delivery' => 'Diantar bengkel', 'shipping' => 'Dikirim paket'][$mode] ?? $mode }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </label>
-                        <label id="delivery-address-field" class="hidden space-y-2 text-xs text-gray-300 md:col-span-2">
-                            <span>Alamat penerima</span>
-                            <textarea id="delivery-address" name="delivery_address" rows="3" maxlength="2000" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none">{{ old('delivery_address') }}</textarea>
-                        </label>
+                        <input type="hidden" name="payment_method" value="cash">
+                        <input type="hidden" name="fulfillment_method" value="pickup">
                         <label class="space-y-2 text-xs text-gray-300 md:col-span-2">
                             <span>Catatan untuk bengkel (opsional)</span>
                             <textarea name="customer_note" rows="2" maxlength="1000" class="w-full rounded-lg border border-gray-700 bg-[#1f2937] px-3 py-2.5 text-xs text-white focus:border-blue-500 focus:outline-none">{{ old('customer_note') }}</textarea>
                         </label>
-                        <p class="text-[11px] text-gray-400 md:col-span-2">Pesanan akan menunggu konfirmasi pembayaran oleh bengkel. Stok fisik belum dipotong saat pesanan dibuat.</p>
-                        <button type="submit" class="rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white transition hover:bg-blue-700 md:col-span-2">Buat Pesanan</button>
+                        <p class="text-[11px] text-gray-400 md:col-span-2">Pembayaran dilakukan saat pengambilan di toko atau melalui metode online di halaman checkout.</p>
+                        <button type="submit" class="rounded-xl bg-blue-600 px-4 py-3 text-xs font-semibold text-white transition hover:bg-blue-700 md:col-span-2">Checkout Sparepart</button>
                     </section>
-                @else
-                    <p class="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-xs text-yellow-200">Bengkel belum menyelesaikan pengaturan alamat, metode pembayaran, dan cara pemenuhan pesanan. Katalog dapat dilihat, tetapi pemesanan belum tersedia.</p>
-                @endif
-            </form>
+                </form>
+            @else
+                <p class="rounded-xl border border-blue-500/20 bg-[#111827] px-4 py-4 text-center text-xs text-gray-300">
+                    <a href="{{ route('login') }}" class="font-semibold text-blue-400 hover:text-blue-300">Masuk atau daftar</a>
+                    untuk memilih sparepart dan checkout.
+                </p>
+            @endauth
         @else
             <div class="rounded-2xl border border-dashed border-gray-700 bg-[#111827] px-5 py-12 text-center">
                 <p class="text-sm font-semibold text-white">{{ $search ? 'Sparepart tidak ditemukan.' : 'Belum ada sparepart tersedia.' }}</p>
@@ -133,16 +118,6 @@
             });
         });
 
-        const fulfillmentMethod = document.getElementById('fulfillment-method');
-        const deliveryAddressField = document.getElementById('delivery-address-field');
-        const deliveryAddress = document.getElementById('delivery-address');
-        const updateDeliveryAddress = () => {
-            const requiresAddress = ['delivery', 'shipping'].includes(fulfillmentMethod?.value);
-            deliveryAddressField?.classList.toggle('hidden', !requiresAddress);
-            deliveryAddress?.toggleAttribute('required', requiresAddress);
-        };
-        fulfillmentMethod?.addEventListener('change', updateDeliveryAddress);
-        updateDeliveryAddress();
     </script>
 </body>
 </html>

@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pembayaran QRIS - AMAHAY</title>
+    <title>Checkout Pembayaran - AMAHAY</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body { background: white !important; color: black !important; }
+            body > main > header { display: none !important; }
+            body > main > section > :not(#receipt) { display: none !important; }
+            #receipt { display: block !important; border: 0 !important; box-shadow: none !important; color: black !important; }
+            #receipt button { display: none !important; }
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-[#0b0f19] font-sans text-gray-200">
     <main class="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
         <header class="flex items-center justify-between gap-4">
             <div>
-                <p class="text-xs uppercase tracking-widest text-blue-400">{{ $tenantName }}</p>
-                <h1 class="mt-1 text-xl font-bold text-white">Pembayaran transaksi</h1>
+                <p class="text-xs uppercase tracking-widest text-amber-400">{{ $tenantName }}</p>
+                <h1 class="mt-1 text-xl font-bold text-white">Checkout Pembayaran</h1>
             </div>
             <a href="{{ route('owner.kasir') }}" class="rounded-lg border border-gray-700 px-4 py-2 text-xs text-gray-300 hover:bg-gray-800">Kembali ke kasir</a>
         </header>
@@ -34,7 +43,7 @@
             <div class="flex flex-wrap items-start justify-between gap-3 border-b border-gray-800 pb-4">
                 <div>
                     <p class="text-[10px] uppercase tracking-wider text-gray-500">Nomor invoice</p>
-                    <p class="mt-1 font-mono text-sm font-bold text-blue-300">{{ $sale->invoice_number }}</p>
+                    <p class="mt-1 font-mono text-sm font-bold text-amber-300">{{ $sale->invoice_number }}</p>
                 </div>
                 <span id="payment-status" class="rounded-full px-3 py-1 text-[10px] font-semibold {{ $payment->status === 'completed' ? 'bg-green-500/15 text-green-300' : 'bg-amber-500/15 text-amber-300' }}">
                     {{ $payment->status === 'completed' ? 'Pembayaran berhasil' : ($payment->status === 'cancelled' ? 'Transaksi dibatalkan' : ($expired ? 'Tagihan kedaluwarsa' : 'Menunggu pembayaran')) }}
@@ -45,6 +54,16 @@
                 <span class="text-xs text-gray-400">Total transaksi</span>
                 <strong class="text-lg text-white">Rp {{ number_format($sale->total, 0, ',', '.') }}</strong>
             </div>
+            <div class="mt-5 space-y-3 border-t border-gray-800 pt-4">
+                <p class="text-xs font-semibold text-white">Rincian item</p>
+                @foreach ($items as $item)
+                    <div class="flex justify-between gap-3 text-[11px]">
+                        <span class="text-gray-300">{{ $item->item_name }} × {{ number_format($item->quantity, 0, ',', '.') }}</span>
+                        <span class="shrink-0 text-gray-300">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                    </div>
+                @endforeach
+                <p class="text-[10px] text-gray-400">Metode: {{ $paymentMethods[$payment->payment_method] ?? $payment->payment_method }}</p>
+            </div>
 
             @if ($sandboxEnabled)
                 <p class="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-[11px] leading-relaxed text-amber-200">
@@ -53,16 +72,23 @@
             @endif
 
             @if ($payment->status === 'completed')
-                <p class="mt-6 rounded-xl bg-green-500/10 p-4 text-center text-sm font-semibold text-green-300">Transaksi sudah dibayar.</p>
+                <div id="receipt" class="mt-6 rounded-xl border border-green-500/30 bg-white p-4 text-gray-900">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-green-700">Struk Lunas</p>
+                    <p class="mt-1 text-sm font-bold">{{ $tenantName }}</p>
+                    <p class="mt-1 font-mono text-xs">{{ $sale->invoice_number }}</p>
+                    <p class="mt-3 border-t border-gray-200 pt-3 text-sm font-bold">Total dibayar Rp {{ number_format($payment->amount, 0, ',', '.') }}</p>
+                    <p class="mt-1 text-[10px]">Metode: {{ $paymentMethods[$payment->payment_method] ?? $payment->payment_method }} · {{ $payment->paid_at ? \Illuminate\Support\Carbon::parse($payment->paid_at)->timezone('Asia/Jakarta')->format('d M Y H:i').' WIB' : now('Asia/Jakarta')->format('d M Y H:i').' WIB' }}</p>
+                    <button type="button" onclick="window.print()" class="mt-4 rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700">Cetak struk</button>
+                </div>
             @elseif ($payment->status === 'cancelled')
-                <p class="mt-6 rounded-xl bg-gray-800 p-4 text-center text-sm text-gray-300">Transaksi dibatalkan dan stok telah dikembalikan.</p>
+                <p class="mt-6 rounded-xl bg-gray-800 p-4 text-center text-sm text-gray-300">Transaksi ini telah dibatalkan.</p>
             @elseif ($active && $qrisSvg)
                 <div class="mt-6 grid gap-6 sm:grid-cols-[1fr_1.2fr] sm:items-center">
                     <div class="mx-auto rounded-2xl bg-white p-3" aria-label="Kode QRIS sandbox">
                         {!! $qrisSvg !!}
                     </div>
                     <div class="space-y-3">
-                        <p class="text-xs font-semibold text-white">Pindai kode QRIS</p>
+                        <p class="text-xs font-semibold text-white">Pindai kode QRIS Sandbox</p>
                         <p class="text-[11px] leading-relaxed text-gray-400">Kode ini hanya untuk simulasi lokal dan mungkin tidak dapat diproses oleh aplikasi bank.</p>
                         <p class="text-[10px] text-gray-500">Referensi: <span class="font-mono text-gray-300">{{ $attempt->payment_reference }}</span></p>
                         <p class="text-xs text-gray-400">Berlaku sampai <span id="qris-countdown" data-expires-at="{{ $expiresAtIso }}" class="font-semibold text-amber-300">--:--</span></p>
@@ -72,9 +98,33 @@
                 @if ($sandboxEnabled)
                     <form method="POST" action="{{ route('owner.kasir.payment.simulate', ['invoice' => $sale->invoice_number]) }}" class="mt-6">
                         @csrf
-                        <button type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-3 text-xs font-bold text-white hover:bg-emerald-700">Simulasikan pembayaran berhasil</button>
+                        <button type="submit" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-xs font-bold text-white hover:bg-amber-600">Simulasikan pembayaran berhasil</button>
                     </form>
                 @endif
+            @elseif (str_starts_with($payment->payment_method, 'va_') && $virtualAccountNumber)
+                <div class="mt-6 rounded-xl border border-gray-700 bg-[#161e2e] p-4">
+                    <p class="text-[10px] uppercase tracking-wider text-gray-400">{{ $paymentMethods[$payment->payment_method] }}</p>
+                    <div class="mt-2 flex items-center justify-between gap-3">
+                        <p id="virtual-account-number" class="font-mono text-lg font-bold tracking-wider text-white">{{ $virtualAccountNumber }}</p>
+                        <button type="button" onclick="copyVirtualAccount()" class="rounded-lg border border-gray-600 px-3 py-2 text-[10px] font-semibold text-amber-300 hover:border-amber-500">Salin</button>
+                    </div>
+                    <p class="mt-3 text-[10px] leading-relaxed text-gray-400">Nomor VA demo tidak terhubung ke rekening sungguhan.</p>
+                </div>
+                @if ($payment->status === 'pending')
+                    <form method="POST" action="{{ route('owner.kasir.payment.simulate', ['invoice' => $sale->invoice_number]) }}" class="mt-6">
+                        @csrf
+                        <button type="submit" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-xs font-bold text-white hover:bg-amber-700">Simulasikan pembayaran berhasil</button>
+                    </form>
+                @endif
+            @elseif ($payment->payment_method === 'ewallet' && $payment->status === 'pending')
+                <div class="mt-6 rounded-xl border border-gray-700 bg-[#161e2e] p-4">
+                    <p class="text-xs font-semibold text-white">E-wallet demo</p>
+                    <p class="mt-2 text-[11px] text-gray-400">Tidak ada akun atau saldo sungguhan yang diakses.</p>
+                </div>
+                <form method="POST" action="{{ route('owner.kasir.payment.simulate', ['invoice' => $sale->invoice_number]) }}" class="mt-6">
+                    @csrf
+                    <button type="submit" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-xs font-bold text-white hover:bg-amber-700">Simulasikan pembayaran berhasil</button>
+                </form>
             @else
                 @if ($expired)
                     <p class="mt-6 rounded-xl bg-amber-500/10 p-4 text-center text-xs text-amber-200">Tagihan sebelumnya kedaluwarsa. Buat QRIS baru untuk melanjutkan.</p>
@@ -82,10 +132,10 @@
                     <p class="mt-6 rounded-xl bg-red-500/10 p-4 text-center text-xs text-red-200">Gateway sandbox tidak merespons. Anda dapat mencoba kembali.</p>
                 @endif
 
-                @if ($sandboxEnabled && $payment->status === 'pending')
+                @if ($payment->payment_method === 'qris' && $sandboxEnabled && $payment->status === 'pending')
                     <form method="POST" action="{{ route('owner.kasir.payment.create', ['invoice' => $sale->invoice_number]) }}" class="mt-6">
                         @csrf
-                        <button type="submit" class="w-full rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white hover:bg-blue-700">
+                        <button type="submit" class="w-full rounded-xl bg-amber-600 px-4 py-3 text-xs font-bold text-white hover:bg-amber-600">
                             {{ $attempt ? 'Buat QRIS baru' : 'Buat tagihan QRIS' }}
                         </button>
                     </form>
